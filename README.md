@@ -1,6 +1,8 @@
 # phpSimpleBookmark
 Simple Bookmark Manager for your local web server (e.g. Synology, QNAP, ..)
 
+Uses https://icon.horse/ to get the icon of you Bookmark and stores it. Stored Icon can be modified and will not be overwriten.
+
 ## Warning!
 No security checks implemented! Only use it in you local network!
 
