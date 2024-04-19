@@ -19,3 +19,5 @@ Optional you can secure it with Basic Authentification / htaccess.
 You can activate the Edit-Mode in the lower left corner.
 
 While in Edit-Mode you can move categories and bookmarks on the title area. With a click in the icon area you get a dialog to change the settings of that element.
+
+![Screenshot](https://raw.githubusercontent.com/Indiana8000/phpSimpleBookmark/afa61c34c5c5bff67c0b4487afe8a50a0cde95c8/screenshot/small.png)
