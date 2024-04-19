@@ -1,0 +1,146 @@
+body {
+    background-color: black;
+    color: white;
+}
+
+.cursor_move {
+    cursor: move;
+}
+
+
+
+#switch_frame {
+    position: absolute;
+    left: 25px;
+    bottom: 25px;
+    width: 150px;
+    text-align: center;
+}
+
+#switch {
+    margin-left: 0px;
+}
+
+
+
+#ca_edit_new {
+    position: fixed;
+    left: 200px;
+    bottom: 25px;
+    width: 125px;
+    z-index: 111;
+}
+
+#bm_edit_new {
+    position: fixed;
+    left: 350px;
+    bottom: 25px;
+    width: 125px;
+    z-index: 111;
+}
+
+
+
+#bm_category_frame {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 200px;
+    height: 100%;
+    padding: 15px;
+}
+
+#bm_category {
+    width: 100%;
+    height: 100%;
+
+    border: 1px solid indigo;
+    border-radius: 15px;
+    padding: 15px;
+
+    text-align: center;
+}
+
+.bm_category_card {
+    position: absolute;
+    left: 25px;
+    top: -150px;
+    width: 150px;
+    height: 100px;
+    overflow: hidden;
+    cursor: pointer;
+    white-space: nowrap;
+
+    border: 1px solid indigo;
+    border-radius: 5px;
+    background-color: #222222;
+}
+
+.bm_category_card_title {
+    padding: 6px;
+    background-color: #444444;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    text-shadow: 0 0 2px black;
+}
+
+.bm_category_card_icon {
+    display: block;
+    padding: 3px;
+    height: 50px;
+    font-size: 40px;
+}
+
+.bm_category_card:hover .bm_category_card_title {
+    background-color: #444444AA;
+}
+
+.bm_category_active {
+    border-top: 1px solid white;
+    border-bottom: 1px solid white;
+}
+
+
+
+#bm_bookmark {
+    position: absolute;
+    left: 200px;
+    top: 0px;
+    height: 100%;
+}
+
+.bm_bookmark_card {
+    position: absolute;
+    left: 200px;
+    top: -200px;
+    width: 150px;
+    height: 150px;
+    overflow: hidden;
+    cursor: pointer;
+    white-space: nowrap;
+
+    border: 1px solid indigo;
+    border-radius: 5px;
+    background-color: #222222;
+
+    text-align: center;
+}
+
+.bm_bookmark_card_title {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    padding: 6px;
+    background-color: #44444499;
+    text-shadow: 0 0 2px black;
+}
+
+.bm_bookmark_card_icon {
+    margin-top: 2px;
+    width: 128px;
+    height: 128px;
+}
+
+.bm_bookmark_card:hover .bm_bookmark_card_title {
+    background-color: #44444455;
+}
