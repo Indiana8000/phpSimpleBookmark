@@ -14,3 +14,8 @@ Just copy all 4 files into any location at your htdoc/web folder.
 For multi user, just create an additional folder with all 4 files.
 
 Optional you can secure it with Basic Authentification / htaccess.
+
+## Usage
+You can activate the Edit-Mode in the lower left corner.
+
+While in Edit-Mode you can move categories and bookmarks on the title area. With a click in the icon area you get a dialog to change the settings of that element.
