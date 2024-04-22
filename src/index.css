@@ -3,10 +3,6 @@ body {
     color: white;
 }
 
-.cursor_move {
-    cursor: move;
-}
-
 
 
 #switch_frame {
@@ -19,6 +15,10 @@ body {
 
 #switch {
     margin-left: 0px;
+}
+
+.cursor_move {
+    cursor: move;
 }
 
 
@@ -39,9 +39,17 @@ body {
     z-index: 111;
 }
 
+#settings_open {
+    position: fixed;
+    left: 500px;
+    bottom: 25px;
+    width: 125px;
+    z-index: 111;
+}
 
 
-#bm_category_frame {
+
+#ca_category_frame {
     position: absolute;
     left: 0px;
     top: 0px;
@@ -50,7 +58,7 @@ body {
     padding: 15px;
 }
 
-#bm_category {
+#ca_category {
     width: 100%;
     height: 100%;
 
@@ -61,7 +69,7 @@ body {
     text-align: center;
 }
 
-.bm_category_card {
+.ca_category_card {
     position: absolute;
     left: 25px;
     top: -150px;
@@ -76,7 +84,7 @@ body {
     background-color: #222222;
 }
 
-.bm_category_card_title {
+.ca_category_card_title {
     padding: 6px;
     background-color: #444444;
     border-top: 1px solid black;
@@ -84,18 +92,18 @@ body {
     text-shadow: 0 0 2px black;
 }
 
-.bm_category_card_icon {
+.ca_category_card_icon {
     display: block;
     padding: 3px;
     height: 50px;
     font-size: 40px;
 }
 
-.bm_category_card:hover .bm_category_card_title {
-    background-color: #444444AA;
+.ca_category_card:hover .ca_category_card_title {
+    background-color: #666666;
 }
 
-.bm_category_active {
+.ca_category_active {
     border-top: 1px solid white;
     border-bottom: 1px solid white;
 }
@@ -131,7 +139,7 @@ body {
     bottom: 0px;
     width: 100%;
     padding: 6px;
-    background-color: #44444499;
+    background-color: #44444466;
     text-shadow: 0 0 2px black;
 }
 
@@ -142,5 +150,5 @@ body {
 }
 
 .bm_bookmark_card:hover .bm_bookmark_card_title {
-    background-color: #44444455;
+    background-color: #444444;
 }

@@ -29,7 +29,7 @@ function getCategoryList() {
           $('#bm_edit_category').append(new Option(myCategories[i].ca_title, myCategories[i].ca_id));
           if(!myCagegoryActive) {
             myCagegoryActive = myCategories[i].ca_id;
-            $('#bm_category').find("[data-caid='" + myCagegoryActive + "']").children(".bm_category_card_title").addClass("bm_category_active");
+            $('#ca_category').find("[data-caid='" + myCagegoryActive + "']").children(".ca_category_card_title").addClass("ca_category_active");
           }
         }
         getBookmarkList();
@@ -39,14 +39,14 @@ function getCategoryList() {
 }
 
 function createCategoryCard(category) {
-  var card = $('#bm_category').find("[data-caid='" + category.ca_id + "']");
+  var card = $('#ca_category').find("[data-caid='" + category.ca_id + "']");
   if(card.length == 0) {
-    var newCategory = '<div class="bm_category_card" data-caid="' + category.ca_id + '"><i class="bm_category_card_icon bi"></i><div class="bm_category_card_title">TITLE</div></div>';
-    $('#bm_category').append(newCategory);
-    card = $('#bm_category').find("[data-caid='" + category.ca_id + "']");
+    var newCategory = '<div class="ca_category_card" data-caid="' + category.ca_id + '"><i class="ca_category_card_icon bi"></i><div class="ca_category_card_title">TITLE</div></div>';
+    $('#ca_category').append(newCategory);
+    card = $('#ca_category').find("[data-caid='" + category.ca_id + "']");
   }
-  card.children(".bm_category_card_title").html(category.ca_title);
-  card.children(".bm_category_card_icon").removeClass().addClass('bm_category_card_icon bi ' + category.ca_icon)
+  card.children(".ca_category_card_title").html(category.ca_title);
+  card.children(".ca_category_card_icon").removeClass().addClass('ca_category_card_icon bi ' + category.ca_icon)
   card.offset({left: card.offset().left, top: 25 + category.ca_pos * 125});
 }
 
@@ -183,6 +183,7 @@ $(document).ready(function() {
   var bm_offset;
   $('#ca_edit_new').hide();
   $('#bm_edit_new').hide();
+  $('#settings_open').hide();
   getCategoryList();
 
   // Settings - Click
@@ -190,22 +191,24 @@ $(document).ready(function() {
     //console.log("Checkbox: " + this.checked);
     editMode = this.checked;
     if(editMode) {
-      $('.bm_category_card_title').addClass('cursor_move');
+      $('.ca_category_card_title').addClass('cursor_move');
       $('.bm_bookmark_card_title').addClass('cursor_move');
       $('#ca_edit_new').show();
       $('#bm_edit_new').show();
+      $('#settings_open').show();
     } else {
-      $('.bm_category_card_title').removeClass('cursor_move');
+      $('.ca_category_card_title').removeClass('cursor_move');
       $('.bm_bookmark_card_title').removeClass('cursor_move');
       $('#ca_edit_new').hide();
       $('#bm_edit_new').hide();
+      $('#settings_open').hide();
     }
     bm_moving = null;
     bm_offset = null;
 });
 
   // Category - Click
-  $(document).on("click", ".bm_category_card", function(event) {
+  $(document).on("click", ".ca_category_card", function(event) {
     event.preventDefault();
     event.stopPropagation();
     var ca_id = parseInt($(this).attr('data-caid'));
@@ -222,8 +225,8 @@ $(document).ready(function() {
       myCagegoryActive = $(this).attr('data-caid');
       for(var i = 0;i < myBookmarks.length;i++)
       createBookmarkCard(myBookmarks[i]);
-      $('.bm_category_card_title').removeClass("bm_category_active");
-      $('#bm_category').find("[data-caid='" + myCagegoryActive + "']").children(".bm_category_card_title").addClass("bm_category_active");
+      $('.ca_category_card_title').removeClass("ca_category_active");
+      $('#ca_category').find("[data-caid='" + myCagegoryActive + "']").children(".ca_category_card_title").addClass("ca_category_active");
     }
   });
 
@@ -317,7 +320,7 @@ $(document).ready(function() {
   });
 
   // Drag & Drop
-  $(document).on("mousedown", ".bm_category_card_title", function(event) {
+  $(document).on("mousedown", ".ca_category_card_title", function(event) {
     if(editMode) {
       event.preventDefault();
       event.stopPropagation();
@@ -343,7 +346,7 @@ $(document).ready(function() {
       event.stopPropagation();
       if(bm_moving) {
         element = $(bm_moving).parent();
-        if(element.hasClass('bm_category_card')) {
+        if(element.hasClass('ca_category_card')) {
           element.offset({left: element.offset().left, top: element.offset().top - (bm_offset.top - event.clientY)});
         } else if(element.hasClass('bm_bookmark_card')) {
           element.offset({left: element.offset().left - (bm_offset.left - event.clientX) , top: element.offset().top - (bm_offset.top - event.clientY)});
@@ -359,7 +362,7 @@ $(document).ready(function() {
       event.stopPropagation();
       element = $(bm_moving).parent();
 
-      if(element.hasClass('bm_category_card')) {
+      if(element.hasClass('ca_category_card')) {
         var ca_id = parseInt(element.attr('data-caid'));
         var ca_elem = myCategories.find((o) => { return o['ca_id'] === ca_id });
         var pos_cur = ca_elem.ca_pos;
