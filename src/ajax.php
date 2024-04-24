@@ -154,9 +154,15 @@ if(isset($_REQUEST['action'])) {
 			$sqlerror = $stmt->errorInfo(); $feedback['status'] = 99; $feedback['message'] = $sqlerror[2];
 		}
 
-	// Bookmark - Save
+	// Bookmark - Delete
 	} elseif($_REQUEST['action'] == "deleteBookmark" && isset($_REQUEST['bm_id'])) {
-		// TBD
+		$stmt = $GLOBALS['DB']->prepare("DELETE FROM bookmark WHERE bm_id = :bm_id");
+		$stmt->bindValue(':bm_id', $_REQUEST['bm_id'], PDO::PARAM_INT);
+		if($stmt->execute()) {
+			$feedback['status'] = 0; $feedback['message'] = "OK";
+		} else {
+			$sqlerror = $stmt->errorInfo(); $feedback['status'] = 99; $feedback['message'] = $sqlerror[2];
+		}
 
 
 	} // End of ACTION

@@ -297,7 +297,7 @@ $(document).ready(function() {
       bm_elem.bm_url = $('#bm_edit_url').val();
       bm_elem.bm_category = $('#bm_edit_category').val();
     } else {
-      // TBD Find free space
+      // Find free space
       var category = $('#bm_edit_category').val();
       var found = false;
       var pos_y = -1;
@@ -331,6 +331,38 @@ $(document).ready(function() {
     $('#bm_modal').modal('show');
   });
 
+  // Bookmark - Delete
+  $('#bm_edit_delete').on("click", function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    var bm_id = parseInt($('#bm_modal').attr('data-bmid'));
+    if(bm_id > 0) {
+      var i = myBookmarks.findIndex((o) => { return o['bm_id'] === bm_id });
+      if(confirm("Delete " + myBookmarks[i].bm_title + "?")) {
+        $.ajax({
+          url: "ajax.php",
+          type: "POST",
+          dataType: "json",
+          data: {
+            action: "deleteBookmark",
+            bm_id: bm_id
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+            alert(errorThrown);
+          },
+          success: function(data, textStatus, jqXHR) {
+            if(data.status != 0) {
+              alert("Ajax Error: " + data.status + " - " + data.message);
+            } else {
+              myBookmarks.splice(i, 1);
+              $('#bm_bookmark').find("[data-bmid='" + bm_id + "']").remove();
+              $('#bm_modal').modal('hide');
+            }
+          }
+        });
+      }
+    }
+  });
 
   // Bookmark - Modal
   $('#bm_modal').on("shown.bs.modal", function(event) {

@@ -3,7 +3,9 @@ body {
     color: white;
 }
 
-
+.modal-footer {
+    justify-content: space-between;
+}
 
 #switch_frame {
     position: absolute;
