@@ -118,7 +118,15 @@ if(isset($_REQUEST['action'])) {
 		$bm['bm_icon'] = parse_url($bm['bm_url'], PHP_URL_HOST);
 		if(strlen($bm['bm_icon']) > 0) {
 			if(!file_exists("icons/" . $bm['bm_icon'] . ".png")) {
-				file_put_contents("icons/" . $bm['bm_icon'] . ".png", file_get_contents("https://icon.horse/icon/" . $bm['bm_icon']));
+				try {
+					$context = stream_context_create(array('http'=>array('timeout' => 60)));
+					@file_put_contents("icons/" . $bm['bm_icon'] . ".png", @file_get_contents("https://icon.horse/icon/" . $bm['bm_icon'], false, $context));
+					if(!(filesize("icons/" . $bm['bm_icon'] . ".png") > 0)) {
+						unlink("icons/" . $bm['bm_icon'] . ".png");
+					}
+				} catch(Exception $e) {
+					$bm['bm_icon'] = "dummy";
+				}
 			}
 		} else {
 			$bm['bm_icon'] = "dummy";

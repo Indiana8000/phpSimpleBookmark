@@ -46,6 +46,7 @@ function createCategoryCard(category) {
     card = $('#ca_category').find("[data-caid='" + category.ca_id + "']");
   }
   card.children(".ca_category_card_title").html(category.ca_title);
+  if(editMode) card.children(".ca_category_card_title").addClass('cursor_move');
   card.children(".ca_category_card_icon").removeClass().addClass('ca_category_card_icon bi ' + category.ca_icon)
   card.offset({left: card.offset().left, top: 25 + category.ca_pos * 125});
 }
@@ -127,6 +128,7 @@ function createBookmarkCard(bookmark) {
     card = $('#bm_bookmark').find("[data-bmid='" + bookmark.bm_id + "']");
   }
   card.children(".bm_bookmark_card_title").html(bookmark.bm_title);
+  if(editMode) card.children(".bm_bookmark_card_title").addClass('cursor_move');
   card.find(".bm_bookmark_card_icon").attr('src', 'icons/' + bookmark.bm_icon + '.png');
   card.children("a").attr('href', bookmark.bm_url);
   if(bookmark.bm_url.lastIndexOf("javascript", 0) === 0) {
@@ -296,7 +298,23 @@ $(document).ready(function() {
       bm_elem.bm_category = $('#bm_edit_category').val();
     } else {
       // TBD Find free space
-      bm_elem = {bm_id: bm_id, bm_title: $('#bm_edit_title').val(), bm_url: $('#bm_edit_url').val(),bm_icon: "", bm_category: $('#bm_edit_category').val(), bm_x: 2, bm_y: 2};
+      var category = $('#bm_edit_category').val();
+      var found = false;
+      var pos_y = -1;
+      var pos_x;
+      while(!found) {
+        pos_x = 0;
+        pos_y++;
+        while(!found && pos_x < 5) {
+          bm_elem = myBookmarks.find((o) => { return o['bm_x'] === pos_x && o['bm_y'] === pos_y && o['bm_category'] === category });
+          if(bm_elem) {
+            pos_x++;
+          } else {
+            found = true;
+          } // pos_x
+        }
+      } // pos_y
+      bm_elem = {bm_id: bm_id, bm_title: $('#bm_edit_title').val(), bm_url: $('#bm_edit_url').val(),bm_icon: "", bm_category: $('#bm_edit_category').val(), bm_x: pos_x, bm_y: pos_y};
     }
     saveBookmarkCard(bm_elem);
     $('#bm_modal').modal('hide');
