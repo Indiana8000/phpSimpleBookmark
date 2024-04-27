@@ -176,6 +176,8 @@ function saveBookmarkCard(bookmark) {
 	});
 }
 
+
+
 // Global Variables
 var editMode = false;
 
@@ -187,6 +189,8 @@ $(document).ready(function() {
   $('#bm_edit_new').hide();
   $('#settings_open').hide();
   getCategoryList();
+
+
 
   // Settings - Click
   $('#switch').on("change", function(event) {
@@ -207,7 +211,9 @@ $(document).ready(function() {
     }
     bm_moving = null;
     bm_offset = null;
-});
+  });
+
+
 
   // Category - Click
   $(document).on("click", ".ca_category_card", function(event) {
@@ -259,10 +265,55 @@ $(document).ready(function() {
     $('#ca_modal').modal('show');
   });
 
+  // Category - Delete
+  $('#ca_edit_delete').on("click", function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    var ca_id = parseInt($('#ca_modal').attr('data-caid'));
+    var bm_elem = myBookmarks.find((o) => { return o['bm_category'] === ca_id.toString() });
+    if(bm_elem) {
+      alert("Not Empty!");
+    } else {
+      var i = myCategories.findIndex((o) => { return o['ca_id'] === ca_id });
+      if(confirm("Delete " + myCategories[i].ca_title + "?")) {
+        $.ajax({
+          url: "ajax.php",
+          type: "POST",
+          dataType: "json",
+          data: {
+            action: "deleteCategory",
+            ca_id: ca_id
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+            alert(errorThrown);
+          },
+          success: function(data, textStatus, jqXHR) {
+            if(data.status != 0) {
+              alert("Ajax Error: " + data.status + " - " + data.message);
+            } else {
+              $('#ca_category').find("[data-caid='" + ca_id + "']").remove();
+              for(var k = 0; k < myCategories.length; k++) {
+                if(k != i && myCategories[k].ca_pos > myCategories[i].ca_pos) {
+                  myCategories[k].ca_pos--;
+                  $('body').find("[data-caid='" + myCategories[k].ca_id + "']").animate({top: 25 +  myCategories[k].ca_pos * 125}, 200);
+                  saveCategoryCard(myCategories[k]);
+                }
+              }
+              myCategories.splice(i, 1);
+              $('#ca_modal').modal('hide');
+            }
+          }
+        });
+      }
+    }
+  });
+
   // Category - Modal
   $('#ca_modal').on("shown.bs.modal", function(event) {
     $('#ca_edit_title').focus();
   });
+
+
 
   // Bookmark - Click
   $(document).on("click", ".bm_bookmark_card", function(event) {
@@ -369,6 +420,8 @@ $(document).ready(function() {
     $('#bm_edit_title').focus();
   });
 
+
+  
   // Drag & Drop
   $(document).on("mousedown", ".ca_category_card_title", function(event) {
     if(editMode) {

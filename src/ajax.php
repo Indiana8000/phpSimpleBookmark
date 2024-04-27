@@ -78,6 +78,8 @@ if(isset($_REQUEST['action'])) {
 	} elseif($_REQUEST['action'] == "saveCategory" && isset($_REQUEST['category'])) {
 		$ca = json_decode($_REQUEST['category'], true);
 
+		if($ca['ca_icon'] == "") $ca['ca_icon'] = "bi-journal-bookmark";
+
 		// Write 2 DB
 		if($ca['ca_id'] > 0) {
 			$stmt = $GLOBALS['DB']->prepare("UPDATE category SET ca_title = :ca_title, ca_icon = :ca_icon, ca_pos = :ca_pos WHERE ca_id = :ca_id");
@@ -100,7 +102,14 @@ if(isset($_REQUEST['action'])) {
 	// Category - Delete
 	} elseif($_REQUEST['action'] == "deleteCategory" && isset($_REQUEST['ca_id'])) {
 		// TBD
-
+		$stmt = $GLOBALS['DB']->prepare("DELETE FROM category WHERE ca_id = :ca_id");
+		$stmt->bindValue(':ca_id', $_REQUEST['ca_id'], PDO::PARAM_INT);
+		if($stmt->execute()) {
+			$feedback['status'] = 0; $feedback['message'] = "OK";
+		} else {
+			$sqlerror = $stmt->errorInfo(); $feedback['status'] = 99; $feedback['message'] = $sqlerror[2];
+		}
+	
 	// Bookmark - List
 	} elseif($_REQUEST['action'] == "getBookmarkList") {
         $feedback['bookmarks'] = Array();
