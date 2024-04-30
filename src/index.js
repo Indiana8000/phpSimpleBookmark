@@ -52,6 +52,7 @@ function createCategoryCard(category) {
 }
 
 function saveCategoryCard(category) {
+  loading_show();
   $.ajax({
 		url: "ajax.php",
 		type: "POST",
@@ -61,9 +62,11 @@ function saveCategoryCard(category) {
       category: JSON.stringify(category)
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
+      loading_hide();
 			alert(errorThrown);
 		},
 		success: function(data, textStatus, jqXHR) {
+      loading_hide();
       if(data.status != 0) {
         alert("Ajax Error: " + data.status + " - " + data.message);
       } else {
@@ -81,7 +84,6 @@ function saveCategoryCard(category) {
         for(var i = 0; i < myCategories.length; i++) {
           $('#bm_edit_category').append(new Option(myCategories[i].ca_title, myCategories[i].ca_id));
         }
-
       }
     }
 	});
@@ -145,6 +147,7 @@ function createBookmarkCard(bookmark) {
 }
 
 function saveBookmarkCard(bookmark) {
+  loading_show();
   $.ajax({
 		url: "ajax.php",
 		type: "POST",
@@ -154,9 +157,11 @@ function saveBookmarkCard(bookmark) {
       bookmark: JSON.stringify(bookmark)
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
+      loading_hide();
 			alert(errorThrown);
 		},
 		success: function(data, textStatus, jqXHR) {
+      loading_hide();
       if(data.status != 0) {
         alert("Ajax Error: " + data.status + " - " + data.message);
       } else {
@@ -176,7 +181,13 @@ function saveBookmarkCard(bookmark) {
 	});
 }
 
+function loading_show() {
+  $('#loading').fadeIn(200);
+}
 
+function loading_hide() {
+  $('#loading').fadeOut(200);
+}
 
 // Global Variables
 var editMode = false;
@@ -189,10 +200,11 @@ $(document).ready(function() {
   $('#bm_edit_new').hide();
   $('#settings_open').hide();
   getCategoryList();
+  loading_hide();
 
 
 
-  // Settings - Click
+  // Switch - Click
   $('#switch').on("change", function(event) {
     //console.log("Checkbox: " + this.checked);
     editMode = this.checked;
@@ -276,6 +288,7 @@ $(document).ready(function() {
     } else {
       var i = myCategories.findIndex((o) => { return o['ca_id'] === ca_id });
       if(confirm("Delete " + myCategories[i].ca_title + "?")) {
+        loading_show();
         $.ajax({
           url: "ajax.php",
           type: "POST",
@@ -285,9 +298,11 @@ $(document).ready(function() {
             ca_id: ca_id
           },
           error: function(jqXHR, textStatus, errorThrown) {
+            loading_hide();
             alert(errorThrown);
           },
           success: function(data, textStatus, jqXHR) {
+            loading_hide();
             if(data.status != 0) {
               alert("Ajax Error: " + data.status + " - " + data.message);
             } else {
@@ -390,6 +405,7 @@ $(document).ready(function() {
     if(bm_id > 0) {
       var i = myBookmarks.findIndex((o) => { return o['bm_id'] === bm_id });
       if(confirm("Delete " + myBookmarks[i].bm_title + "?")) {
+        loading_show();
         $.ajax({
           url: "ajax.php",
           type: "POST",
@@ -399,9 +415,11 @@ $(document).ready(function() {
             bm_id: bm_id
           },
           error: function(jqXHR, textStatus, errorThrown) {
+            loading_hide();
             alert(errorThrown);
           },
           success: function(data, textStatus, jqXHR) {
+            loading_hide();
             if(data.status != 0) {
               alert("Ajax Error: " + data.status + " - " + data.message);
             } else {

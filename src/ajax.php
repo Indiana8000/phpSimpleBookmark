@@ -101,7 +101,6 @@ if(isset($_REQUEST['action'])) {
 
 	// Category - Delete
 	} elseif($_REQUEST['action'] == "deleteCategory" && isset($_REQUEST['ca_id'])) {
-		// TBD
 		$stmt = $GLOBALS['DB']->prepare("DELETE FROM category WHERE ca_id = :ca_id");
 		$stmt->bindValue(':ca_id', $_REQUEST['ca_id'], PDO::PARAM_INT);
 		if($stmt->execute()) {
