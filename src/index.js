@@ -2,6 +2,10 @@
 // *** phpSimpleBookmar ... yehaaa!
 // ***
 
+// Configuration
+const ca_space_top = 25, ca_space_between = 110;
+const bm_space_top = 15, bm_space_between = 160, bm_space_left = 200;
+
 // Categories
 var myCategories;
 var myCagegoryActive;
@@ -14,10 +18,12 @@ function getCategoryList() {
 			action: "getCategoryList"
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
+      loading_hide();
 			alert(errorThrown);
 		},
 		success: function(data, textStatus, jqXHR) {
       if(data.status != 0) {
+        loading_hide();
         alert("Ajax Error: " + data.status + " - " + data.message);
       } else {
         console.log('getCategoryList - ' + data.categories.length);
@@ -48,7 +54,7 @@ function createCategoryCard(category) {
   card.children(".ca_category_card_title").html(category.ca_title);
   if(editMode) card.children(".ca_category_card_title").addClass('cursor_move');
   card.children(".ca_category_card_icon").removeClass().addClass('ca_category_card_icon bi ' + category.ca_icon)
-  card.offset({left: card.offset().left, top: 25 + category.ca_pos * 125});
+  card.offset({left: card.offset().left, top: ca_space_top + category.ca_pos * ca_space_between});
 }
 
 function saveCategoryCard(category) {
@@ -102,9 +108,11 @@ function getBookmarkList() {
 			action: "getBookmarkList"
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
+      loading_hide();
 			alert(errorThrown);
 		},
 		success: function(data, textStatus, jqXHR) {
+      loading_hide();
       if(data.status != 0) {
         alert("Ajax Error: " + data.status + " - " + data.message);
       } else {
@@ -140,7 +148,7 @@ function createBookmarkCard(bookmark) {
   }
   if(bookmark.bm_category == myCagegoryActive) {
     card.show();
-    card.offset({left: 200 + bookmark.bm_x * 160, top: 25 + bookmark.bm_y * 160});
+    card.offset({left: bm_space_left + bookmark.bm_x * bm_space_between, top: bm_space_top + bookmark.bm_y * bm_space_between});
   } else {
     card.hide();
   }
@@ -182,11 +190,11 @@ function saveBookmarkCard(bookmark) {
 }
 
 function loading_show() {
-  $('#loading').fadeIn(200);
+  $('#loading').fadeIn(50);
 }
 
 function loading_hide() {
-  $('#loading').fadeOut(200);
+  $('#loading').fadeOut(250);
 }
 
 // Global Variables
@@ -200,8 +208,6 @@ $(document).ready(function() {
   $('#bm_edit_new').hide();
   $('#settings_open').hide();
   getCategoryList();
-  loading_hide();
-
 
 
   // Switch - Click
@@ -489,7 +495,7 @@ $(document).ready(function() {
         var pos_cur = ca_elem.ca_pos;
         
         var pos = element.offset().top;
-        pos_new = Math.round((pos - 25) / 125);
+        pos_new = Math.round((pos - ca_space_top) / ca_space_between);
         if(pos_new < 0) pos_new = 0;
         if(pos_new > myCategories.length -1) pos_new = myCategories.length -1;
   
@@ -501,15 +507,15 @@ $(document).ready(function() {
           for(var i = 0; i < myCategories.length; i++) {
             if(myCategories[i].ca_id != ca_id && myCategories[i].ca_pos.between(pos_cur,pos_new)) {
               myCategories[i].ca_pos += pos_mod;
-              $('body').find("[data-caid='" + myCategories[i].ca_id + "']").animate({top: 25 +  myCategories[i].ca_pos * 125}, 200);
+              $('body').find("[data-caid='" + myCategories[i].ca_id + "']").animate({top: ca_space_top +  myCategories[i].ca_pos * ca_space_between}, 200);
               saveCategoryCard(myCategories[i]);
             }
           }
           ca_elem.ca_pos = pos_new;
-          element.animate({"z-index": 9, top: 25 +  pos_new * 125}, 200);
+          element.animate({"z-index": 9, top: ca_space_top +  pos_new * ca_space_between}, 200);
           saveCategoryCard(ca_elem);
         } else {
-          element.animate({"z-index": 9, top: 25 +  pos_new * 125}, 200);
+          element.animate({"z-index": 9, top: ca_space_top +  pos_new * ca_space_between}, 200);
         }
 
       } else if(element.hasClass('bm_bookmark_card')) {
@@ -517,23 +523,23 @@ $(document).ready(function() {
         var bm_elem = myBookmarks.find((o) => { return o['bm_id'] === bm_id });
   
         var pos_x = element.offset().left;
-        pos_x = Math.round((pos_x - 200) / 160);
+        pos_x = Math.round((pos_x - bm_space_left) / bm_space_between);
         var pos_y = element.offset().top;
-        pos_y = Math.round((pos_y - 25) / 160);
+        pos_y = Math.round((pos_y - bm_space_top) / bm_space_between);
         if(bm_elem.bm_x != pos_x || bm_elem.bm_y != pos_y) {
           var bm_overlap = myBookmarks.find((o) => { return o['bm_x'] === pos_x && o['bm_y'] === pos_y && o['bm_category'] === bm_elem.bm_category });
           if(bm_overlap) {
             bm_overlap.bm_x = bm_elem.bm_x;
             bm_overlap.bm_y = bm_elem.bm_y;
-            $('#bm_bookmark').find("[data-bmid='" + bm_overlap.bm_id + "']").animate({left: 0 + bm_overlap.bm_x * 160, top: 25 + bm_overlap.bm_y * 160}, 200);
+            $('#bm_bookmark').find("[data-bmid='" + bm_overlap.bm_id + "']").animate({left: 0 + bm_overlap.bm_x * bm_space_between, top: bm_space_top + bm_overlap.bm_y * bm_space_between}, 200);
             saveBookmarkCard(bm_overlap);
           }
           bm_elem.bm_x = pos_x;
           bm_elem.bm_y = pos_y;
-          element.animate({"z-index": 9, left: 0 + pos_x * 160, top: 25 + pos_y * 160}, 200);
+          element.animate({"z-index": 9, left: 0 + pos_x * bm_space_between, top: bm_space_top + pos_y * bm_space_between}, 200);
           saveBookmarkCard(bm_elem);
         } else {
-          element.animate({"z-index": 9, left: 0 + pos_x * 160, top: 25 + pos_y * 160}, 200);
+          element.animate({"z-index": 9, left: 0 + pos_x * bm_space_between, top: bm_space_top + pos_y * bm_space_between}, 200);
         }
       }
       window.setTimeout(function() {
