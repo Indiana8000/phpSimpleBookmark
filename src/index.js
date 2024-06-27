@@ -272,7 +272,7 @@ $(document).ready(function() {
     if(editMode) {
       if(!bm_moving) {
         var ca_elem = myCategories.find((o) => { return o['ca_id'] === ca_id });
-        $('#ca_modal').attr('data-caid', ca_id)
+        $('#ca_modal').attr('data-caid', ca_id);
         $('#ca_edit_title').val(ca_elem.ca_title);
         $('#ca_edit_icon').val(ca_elem.ca_icon);
         $('#ca_modal').modal('show');
@@ -372,12 +372,12 @@ $(document).ready(function() {
 
   // Bookmark - Click
   $(document).on("click", ".bm_bookmark_card", function(event) {
+    event.preventDefault();
+    event.stopPropagation();
     var bm_id = parseInt($(this).attr('data-bmid'));
     console.log("Bookmark Clicked: " + bm_id);
     var bm_elem = myBookmarks.find((o) => { return o['bm_id'] === bm_id });
     if(editMode) {
-      event.preventDefault();
-      event.stopPropagation();
       if(!bm_moving) {
         $('#bm_modal').attr('data-bmid', bm_id);
         $('#bm_edit_title').val(bm_elem.bm_title);
@@ -387,7 +387,7 @@ $(document).ready(function() {
       }
     } else {
       // Alternative to use Hyperlinks
-      //window.open(bm_elem.bm_url, '_blank');
+      window.open(bm_elem.bm_url, '_blank');
     }
   });
 
