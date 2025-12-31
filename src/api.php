@@ -16,7 +16,8 @@ switch($action){
         usort($data['categories'], function ($a, $b) {return strnatcasecmp($a['name'],$b['name']);});
         echo json_encode($data['categories']); break;
     case 'addCategory':
-        $data['categories'][] = ['id'=>time(),'name'=>$input['name'],'icon'=>$input['icon']??'bi-folder'];
+        $id = $storage->nextId($data['categories']); // $id = time();
+        $data['categories'][] = ['id'=>$id,'name'=>$input['name'],'icon'=>$input['icon']??'bi-folder'];
         $storage->save($data);
         echo json_encode(true);
         break;
@@ -42,7 +43,7 @@ switch($action){
         echo json_encode(array_values(array_filter($data['items'],fn($i)=>$i['category_id']==$input['category_id'])));
         break;
     case 'addItem':
-        $id = time(); // oder eigener ID-Generator
+        $id = $storage->nextId($data['items']); // $id = time();
 
         $imagePath = '';
         if (!empty($_FILES['image'])) {

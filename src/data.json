@@ -1,10 +1,9 @@
 {
   "categories": [
-    { "id": 1, "name": "Allgemein/Allgemein", "icon": "bi-folder" },
-    { "id": 2, "name": "Technik/CPUs", "icon": "bi-cpu" }
+    { "id": 1, "name": "General/General", "icon": "bi-stars"  },
+    { "id": 2, "name": "General/News"   , "icon": "bi-folder" }
   ],
   "items": [
-    { "id": 1, "category_id": 1, "title": "Willkommen", "url": "https://www.google.com/", "content": "Erster Eintrag" },
-    { "id": 2, "category_id": 2, "title": "Server", "url": "https://www.google.com/", "content": "Linux Setup" }
+    { "id": 1, "category_id": "1", "title": "Example Entry: Google", "url": "https://www.google.com/", "content": "Google Search", "image": "", "preview": "" }
   ]
 }

@@ -197,8 +197,29 @@ class Storage
     private function emptyStructure(): array
     {
         return [
-            'categories' => [],
-            'items'      => []
+            'categories' => [
+                [
+                    "id" => 1,
+                    "name" => "General/General",
+                    "icon" => "bi-stars"
+                ],
+                [
+                    "id" => 2,
+                    "name" => "General/News",
+                    "icon" => "bi-folder"
+                ]
+            ],
+            'items'      => [
+                [
+                    "id" => 1,
+                    "category_id" => "1",
+                    "title" => "Example Entry: Google",
+                    "url" => "https://www.google.com/",
+                    "content" => "Google Search",
+                    "image" => "",
+                    "preview" => ""
+                ]
+            ]
         ];
     }
 }
