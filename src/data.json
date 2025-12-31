@@ -1,0 +1,10 @@
+{
+  "categories": [
+    { "id": 1, "name": "Allgemein/Allgemein", "icon": "bi-folder" },
+    { "id": 2, "name": "Technik/CPUs", "icon": "bi-cpu" }
+  ],
+  "items": [
+    { "id": 1, "category_id": 1, "title": "Willkommen", "url": "https://www.google.com/", "content": "Erster Eintrag" },
+    { "id": 2, "category_id": 2, "title": "Server", "url": "https://www.google.com/", "content": "Linux Setup" }
+  ]
+}
