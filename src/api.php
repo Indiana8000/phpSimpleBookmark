@@ -17,7 +17,7 @@ switch($action){
         echo json_encode($data['categories']); break;
     case 'addCategory':
         $id = $storage->nextId($data['categories']); // $id = time();
-        $data['categories'][] = ['id'=>$id,'name'=>$input['name'],'icon'=>$input['icon']??'bi-folder'];
+        $data['categories'][] = ['id'=>$id,'name'=>$input['name'],'icon'=>$input['icon']??'bi-folder','view'=>'list'];
         $storage->save($data);
         echo json_encode(true);
         break;
@@ -35,6 +35,11 @@ switch($action){
             }
         }
         $data['items'] = array_values(array_filter($data['items'],fn($i)=>$i['category_id']!=$input['id']));
+        $storage->save($data);
+        echo json_encode(true);
+        break;
+    case 'updateCategoryView':
+        foreach($data['categories'] as &$c) if($c['id']==$input['id']) { $c['view']=$input['view']; }
         $storage->save($data);
         echo json_encode(true);
         break;

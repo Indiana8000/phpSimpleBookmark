@@ -94,7 +94,7 @@ class Storage
         return empty($list) ? 1 : max(array_column($list, 'id')) + 1;
     }
 
-    public function findById(array &$list, int $id): ?array
+    public function findById(array &$list, int $id): ?array // Read-only Access!
     {
         foreach ($list as &$entry) {
             if ($entry['id'] === $id) {

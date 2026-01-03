@@ -25,11 +25,11 @@ function renderCategoryTitle(id, title) {
 }
 
 function renderCategory(c) {
-    title = c.name.split("/", 2);
+    let title = c.name.split("/", 2);
     if(title.length > 1) title = title[1];
     else title = '-';
     return `
-    <li class="list-group-item category-dragndrop-item pointer" data-id="${c.id}" data-icon="${c.icon}">
+    <li class="list-group-item category-dragndrop-item pointer" data-id="${c.id}" data-view="${c.view}" data-icon="${c.icon}">
         <div class="list-content">
             <i class="bi ${c.icon} category-icon"></i>
             <span class="category-name">${title}</span>
@@ -110,25 +110,28 @@ function loadCategories() {
         $('#categoryList').empty();
         let title = "";
         let title_id = 1;
-        let newCategory = false;
         res.forEach(c => {
             let x = c.name.split("/");
+            c.view = c.view ?? 'list';
             if(x[0] != title) {
                 title = x[0];
                 title_id++;
                 $('#categoryList').append(renderCategoryTitle(title_id, title));
             }
-            if(!currentCategory) {currentCategory = c.id; newCategory = true; }
+            if(!currentCategory) {
+                currentCategory = c.id;
+                loadItems(c.id, c.view);
+            }
             $('#c_' + title_id).append(renderCategory(c))
         });
         if(currentCategory) $("#categoryList").find(`[data-id='${currentCategory}']`).addClass('category-active');
-        if(newCategory) loadItems(currentCategory);
     });
 }
 
-function loadItems(categoryId) {
+function loadItems(categoryId, view) {
     api('getItems', { category_id: categoryId }, res => {
         $('#itemList').empty();
+        setViewState(view);
         res.forEach(i => $('#itemList').append(renderItem(i)));
     });
 }
@@ -138,11 +141,12 @@ function loadItems(categoryId) {
 // ======================
 $(document).on('click', '#categoryList li', function() {
     const id = $(this).data('id');
+    const view = $(this).data('view');
     if(id) {
-        currentCategory = $(this).data('id');
+        currentCategory = id;
         $("#categoryList").find("li.category-active").removeClass("category-active");   
         $(this).addClass('category-active');
-        loadItems(currentCategory);
+        loadItems(id, view);
     }
 });
 
@@ -471,12 +475,11 @@ function setViewState(view = 'list') {
 $('.view-toggle').on('click', function () {
     const view = $(this).data('view');
     setViewState(view);
+    api('updateCategoryView', { id: currentCategory, view: view }, () => {
+        $('#categoryList .list-group-item[data-id=' + currentCategory + ']').data('view', view);
+    });
 });
 
-
-const savedView = 'list';
-$('#itemList').addClass('view-' + savedView);
-$(`.view-toggle[data-view="${savedView}"]`).addClass('active');
 
 
 // Test Button
