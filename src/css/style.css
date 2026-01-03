@@ -248,14 +248,15 @@ body {
 /* View-Grid */
 #itemList.view-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
+    gap: 1rem;
 }
 
 #itemList.view-grid .list-group-item {
-    height: 140px;
+    aspect-ratio: 1;
+    /* height: 144px; */
     text-align: center;
-    padding: 10px;
+    padding: 6px;
     border-radius: 4px;
 }
 
