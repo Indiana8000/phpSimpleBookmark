@@ -6,6 +6,7 @@
     --secondary-background: #ccc;
     --selected-background: #3d3e3f;
     --image-background: #666;
+    --title-background: #3d3e3f99;
 }
 body {
     background: var(--secondary-color);
@@ -14,20 +15,20 @@ body {
 
 /* Main Panels */
 .sidebar {
-    width: 260px;
+    width: 240px;
     height: 100vh;
     position: fixed;
     left: 0;
     top: 0;
-    padding: 1rem;
+    padding: 0.7rem;
     overflow-y: auto;
     background: var(--primary-background);
     color: var(--primary-color);
 }
 .content {
-    margin-left: 260px;
+    margin-left: 240px;
     height: 100vh;
-    padding: 2rem;
+    padding: 1.3rem;
     overflow-y: auto;
 }
 
@@ -41,7 +42,7 @@ body {
     gap: 1rem;
     position: relative;
     background-color: var(--secondary-background);
-    padding: 0.5rem;
+    padding: 0.3rem;
 }
 /* Action Icons - Hover Effect */
 .list-hover-actions {
@@ -54,12 +55,19 @@ body {
     gap: 6px;
 
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.2s ease;
+
+    transition:
+        opacity .15s ease,
+        visibility 0s linear .15s; /* Verzögerung beim Ausblenden */
 }
 .list-group-item:hover .list-hover-actions {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+
+    transition-delay: .3s;
 }
 /* Content of list-group */
 .list-content {
@@ -92,13 +100,13 @@ body {
 }
 /* Action Icons - Style*/
 .edit-category, .delete-category {
-    padding: 6px 3px;
+    padding: 4px 3px;
     background-color: #000000bb;
     border: 1px solid var(--bs-border-color);
     border-radius: 4px;
 }
 .save-category, .cancel-category {
-    padding: 6px 3px;
+    padding: 4px 3px;
     background-color: #000000bb;
     border: 1px solid var(--bs-border-color);
     border-radius: 4px;
@@ -174,11 +182,17 @@ body {
 }
 
 .item-title {
+    display: block;
     font-size: 1.2rem;
 }
 
 .item-url {
+    display: block;
     text-decoration: none;
+}
+
+.item-content {
+    display: block;
 }
 
 .icon-img {
@@ -251,11 +265,21 @@ body {
     height: 100%;
 }
 
+#itemList.view-grid .item-main {
+    position: absolute;
+    bottom: 0;
+    padding: 0.25rem;
+    width: 100%;
+    overflow: hidden;
+    color: var(--primary-color);
+    background-color: var(--title-background);
+}
+
 #itemList.view-grid .item-img,
 #itemList.view-grid .item-preview {
-    width: 64px;
-    height: 64px;
-    margin: 6px 0 6px 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
 }
 
 #itemList.view-grid .item-content,

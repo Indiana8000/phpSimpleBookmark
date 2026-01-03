@@ -21,7 +21,7 @@ function api(action, data = {}, cb) {
 // Render Functions
 // ======================
 function renderCategoryTitle(id, title) {
-    return `<h5 class="mb-3">${title}</h5><ul id="c_${id}" class="list-group mb-3"></ul>`;
+    return `<h5 class="mb-1">${title}</h5><ul id="c_${id}" class="list-group mb-2"></ul>`;
 }
 
 function renderCategory(c) {
@@ -60,8 +60,8 @@ function renderItem(i) {
         <div class="list-content list-content-item">
             <img src="${i.image}" class="item-img">
             <div class="item-main">
-                <strong class="item-title  ">${i.title}</strong><br>
-                <small  class="item-url    "><a href="${i.url}" target="_blank">${i.url}</a></small><br>
+                <strong class="item-title  ">${i.title}</strong>
+                <small  class="item-url    "><a href="${i.url}" target="_blank">${i.url}</a></small>
                 <span   class="item-content">${i.content}</span>
             </div>
             <img src="${i.preview}" class="item-preview">
@@ -282,6 +282,7 @@ $(document).on('click', '.item-act-edit', function(e){
     const content = li.find('.item-content').text();
     const image = li.find('img.item-img').attr('src');
     const preview = li.find('img.item-preview').attr('src');
+    setViewState();
     li.attr('draggable', false);
     li.addClass('editing');
     li.html(createItemEditHtml(title, content, image, url, preview));
@@ -310,6 +311,14 @@ $(document).on('click', '.item-act-icon', function (e) {
         $('#iconModal .modal-title').html('Select Icon');
     });
 });
+$(document).on('click', '.icon-img', function (e) {
+    e.stopPropagation();
+    api('setIcon', { id: $('#iconLists').attr('data-id'), url: $(this).attr('src') }, () => {
+        loadItems(currentCategory);
+        $('#iconModal').modal('hide');
+    });
+});
+
 
 $(document).on('click', '.item-act-screenshot', function (e) {
     e.stopPropagation();
@@ -333,7 +342,6 @@ $(document).on('click', '.item-act-screenshot', function (e) {
         }
     });
 });
-
 $(document).on('click', '#saveScreenshot', function (e) {
     e.stopPropagation();
     const formData = new FormData();
@@ -356,14 +364,6 @@ $(document).on('click', '#saveScreenshot', function (e) {
     }
 });
 
-$(document).on('click', '#deleteScreenshot', function (e) {
-    e.stopPropagation();
-    api('deleteScreenshot', { id: $('#screenshotModalPreview').data('id') }, res => {
-        $('#screenshotModal').modal('hide');
-        loadItems(currentCategory);
-    });
-});
-
 $(document).on('click', '.item-preview', function (e) {
     e.stopPropagation();
     const li = $(this).closest('li');
@@ -375,12 +375,11 @@ $(document).on('click', '.item-preview', function (e) {
     $('#screenshotModalPreview').attr('src', $(this).attr('src'));
     $('#screenshotModal').modal('show');
 });
-
-$(document).on('click', '.icon-img', function (e) {
+$(document).on('click', '#deleteScreenshot', function (e) {
     e.stopPropagation();
-    api('setIcon', { id: $('#iconLists').attr('data-id'), url: $(this).attr('src') }, () => {
+    api('deleteScreenshot', { id: $('#screenshotModalPreview').data('id') }, res => {
+        $('#screenshotModal').modal('hide');
         loadItems(currentCategory);
-        $('#iconModal').modal('hide');
     });
 });
 
@@ -455,20 +454,23 @@ $(document).on('drop', '.category-dragndrop-item', function(e) {
 
 
 
-
-
-$('.view-toggle').on('click', function () {
-
-    const view = $(this).data('view');
-
+// ======================
+// 
+// ======================
+function setViewState(view = 'list') {
+    // Set Toggle-Button
     $('.view-toggle').removeClass('active');
-    $(this).addClass('active');
+    $('.view-toggle[data-view=' + view + ']').addClass('active');
 
+    // Set View
     $('#itemList')
         .removeClass('view-list view-grid')
         .addClass('view-' + view);
+}
 
-    localStorage.setItem('itemView', view);
+$('.view-toggle').on('click', function () {
+    const view = $(this).data('view');
+    setViewState(view);
 });
 
 
