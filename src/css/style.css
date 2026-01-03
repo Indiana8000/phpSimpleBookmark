@@ -6,7 +6,8 @@
     --secondary-background: #ccc;
     --selected-background: #3d3e3f;
     --image-background: #666;
-    --title-background: #3d3e3f99;
+    --title-background: #3d3e3f60;
+    --title-highlite: #3d3e3fab;
 }
 body {
     background: var(--secondary-color);
@@ -78,6 +79,10 @@ body {
     gap: 0.5rem;
     /* white-space: nowrap; */
     overflow: hidden;
+}
+#categoryList .list-group-item:hover .category-icon {
+    text-shadow: 1px 1px 2px grey;
+    color: darkgreen;
 }
 .list-content-item {
   display: flex;
@@ -269,11 +274,14 @@ body {
 #itemList.view-grid .item-main {
     position: absolute;
     bottom: 0;
-    padding: 0.25rem;
+    padding: 0.3rem;
     width: 100%;
     overflow: hidden;
     color: var(--primary-color);
     background-color: var(--title-background);
+}
+#itemList.view-grid .list-group-item:hover .item-main {
+    background-color: var(--title-highlite);
 }
 
 #itemList.view-grid .item-img,
