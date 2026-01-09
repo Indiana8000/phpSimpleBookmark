@@ -24,3 +24,12 @@ Ensure that data.json and the uploads folder is writeable for the webserver.
 For multi user, just create an additional folder with all files.
 
 You can secure it with Basic Authentification / htaccess.
+
+## Notes
+
+Category titles are composed of two parts seperated by a /. The prefix is the top category and the suffix the subcategory. Add / Modify automaticly adds the current top category as prefix. To move a subcategory you have to add the prefix manually while adding/modifing.
+
+Bookmarks can move to other subcategories by drag and drop on to the category.
+
+# Example Screenshot
+![Screenshot](screenshot1.jpg)

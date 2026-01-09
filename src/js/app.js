@@ -44,8 +44,8 @@ function renderCategory(c) {
 function createCategoryEditHtml(title='', icon='bi-folder') {
     return `
         <div class="list-content">
-            <strong class="category-name inline-edit m-1" contenteditable="true">${title}</strong>
-            <span   class="category-icon inline-edit m-1" contenteditable="true">${icon}</span>
+            <strong class="category-name inline-edit m-1" contenteditable="true" title="Title">${title}</strong>
+            <span   class="category-icon inline-edit m-1" contenteditable="true" title="Icon">${icon}</span>
         </div>
         <div class="list-hover-actions">
             <i class="bi bi-check-lg text-success pointer save-category"></i>
@@ -68,9 +68,9 @@ function renderItem(i) {
         </div>
         <div class="list-hover-actions">
             <i class="bi bi-pencil             text-warning pointer item-act-edit"></i>
-            <i class="bi bi-arrow-left-square  text-info    pointer item-act-icon"></i>
-            <i class="bi bi-arrow-right-square text-info    pointer item-act-screenshot"></i>
-            <i class="bi bi-trash              text-danger  pointer item-act-delete"></i>
+            <i class="bi bi-arrow-left-square  text-info    pointer item-act-icon"       title="Get Icon"></i>
+            <i class="bi bi-arrow-right-square text-info    pointer item-act-screenshot" title="Make Screenshot"></i>
+            <i class="bi bi-trash              text-danger  pointer item-act-delete""></i>
         </div>
     </li>`;
 }
@@ -80,9 +80,9 @@ function createItemEditHtml(title='', content='', image='', url='', preview='') 
     <div class="list-content list-content-item">
         <img src="${image}" class="item-img itemDropZone" id="itemImg">
         <div class="item-main">
-            <strong class="item-title   inline-edit m-1" contenteditable="true">${title}</strong>
-            <small  class="item-url     inline-edit m-1" contenteditable="true">${url}</small>
-            <span   class="item-content inline-edit m-1" contenteditable="true">${content}</span>
+            <strong class="item-title   inline-edit m-1" contenteditable="true" title="Title">${title}</strong>
+            <small  class="item-url     inline-edit m-1" contenteditable="true" title="URL">${url}</small>
+            <span   class="item-content inline-edit m-1" contenteditable="true" title="Description">${content}</span>
         </div>
         <img src="${preview}" class="item-preview itemDropZone" id="itemPrev">
     </div>
@@ -215,6 +215,7 @@ $(document).on('click', '.delete-category', function(e){
 $('#addItem').click(() => {
     if(!currentCategory) return alert('Kategorie wählen');
     const li = $('<li class="list-group-item editing"></li>');
+    setViewState();
     li.html(createItemEditHtml());
     $('#itemList').prepend(li);
     li.find('.item-url').focus();

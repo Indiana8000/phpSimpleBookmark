@@ -104,6 +104,16 @@ class Storage
         return null;
     }
 
+    public function findIndexById(array $list, int $id): ?int
+    {
+        foreach ($list as $i => $entry) {
+            if ($entry['id'] === $id) {
+                return $i;
+            }
+        }
+        return null;
+    }
+
     public function deleteById(array &$list, int $id): bool
     {
         foreach ($list as $i => $entry) {
