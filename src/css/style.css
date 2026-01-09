@@ -25,6 +25,9 @@ body {
     overflow-y: auto;
     background: var(--primary-background);
     color: var(--primary-color);
+    z-index: 10;
+    transition:
+        transform 0.2s ease;
 }
 .content {
     margin-left: 240px;
@@ -226,13 +229,14 @@ body {
   border: 2px solid lime;
 }
 
+
+
+
 #toggleToolBar {
     position: fixed;
     bottom: 12px;
-    right: 12px;;
+    right: 12px;
 }
-
-
 
 /* View-List <-> View-Grid */
 #itemList {
@@ -308,4 +312,33 @@ body {
     top: unset;
     bottom: 0;
     right: 16px;
+}
+
+
+.sidebar.show {
+    transform: none;
+}
+
+#sidebar-btn {
+    display: none;
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+    z-index: 5;
+}
+
+@media (max-width: 991px) {
+    .content {
+        margin: 0.3rem;
+        padding: 0;
+    }
+    #itemList.view-list .item-preview {
+        display: none;
+    }
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    #sidebar-btn {
+        display: block;
+    }
 }
