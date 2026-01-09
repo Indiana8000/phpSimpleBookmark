@@ -31,5 +31,7 @@ Category titles are composed of two parts seperated by a /. The prefix is the to
 
 Bookmarks can move to other subcategories by drag and drop on to the category.
 
+Icon and preview image can be set manually while editing via drag and drop of a image file.
+
 # Example Screenshot
 ![Screenshot](screenshot1.jpg)
