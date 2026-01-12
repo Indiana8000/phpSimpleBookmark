@@ -71,7 +71,7 @@ function renderItem(i) {
         <div class="list-hover-actions">
             <i class="bi bi-pencil             text-warning pointer item-act-edit"></i>
             <i class="bi bi-arrow-left-square  text-info    pointer item-act-icon"       title="Get Icon"></i>
-            <i class="bi bi-arrow-right-square text-info    pointer item-act-screenshot" title="Make Screenshot"></i>
+            <i class="bi bi-arrow-right-square text-info    pointer item-act-screenshot" title="Take Screenshot"></i>
             <i class="bi bi-trash              text-danger  pointer item-act-delete""></i>
         </div>
     </li>`;
@@ -244,7 +244,7 @@ $(document).on('click', '#itemList li', function(e) {
 });
 
 // Save Item
-$(document).on('click', '.save-item', function (e) {
+$(document).on('click', '.save-item', function(e) {
     e.preventDefault();
     e.stopPropagation();
     const li = $(this).closest('li');
@@ -323,7 +323,7 @@ $(document).on('click', '.item-act-delete', function(e){
     api('deleteItem', { id: li.data('id') }, () => loadItems(currentCategory));
 });
 
-$(document).on('click', '.item-act-icon', function (e) {
+$(document).on('click', '.item-act-icon', function(e) {
     e.preventDefault();
     e.stopPropagation();
     $('.sidebar').removeClass('show');
@@ -338,7 +338,7 @@ $(document).on('click', '.item-act-icon', function (e) {
         $('#iconModal .modal-title').html('Select Icon');
     });
 });
-$(document).on('click', '.icon-img', function (e) {
+$(document).on('click', '.icon-img', function(e) {
     e.preventDefault();
     e.stopPropagation();
     api('setIcon', { id: $('#iconLists').attr('data-id'), url: $(this).attr('src') }, () => {
@@ -347,7 +347,7 @@ $(document).on('click', '.icon-img', function (e) {
     });
 });
 
-$(document).on('click', '.item-act-screenshot', function (e) {
+$(document).on('click', '.item-act-screenshot', function(e) {
     e.preventDefault();
     e.stopPropagation();
     $('.sidebar').removeClass('show');
@@ -371,7 +371,7 @@ $(document).on('click', '.item-act-screenshot', function (e) {
         }
     });
 });
-$(document).on('click', '#saveScreenshot', function (e) {
+$(document).on('click', '#saveScreenshot', function(e) {
     e.preventDefault();
     e.stopPropagation();
     const formData = new FormData();
@@ -394,7 +394,7 @@ $(document).on('click', '#saveScreenshot', function (e) {
     }
 });
 
-$(document).on('click', '.item-preview', function (e) {
+$(document).on('click', '.item-preview', function(e) {
     e.preventDefault();
     e.stopPropagation();
     $('.sidebar').removeClass('show');
@@ -407,7 +407,7 @@ $(document).on('click', '.item-preview', function (e) {
     $('#screenshotModalPreview').attr('src', $(this).attr('src'));
     $('#screenshotModal').modal('show');
 });
-$(document).on('click', '#deleteScreenshot', function (e) {
+$(document).on('click', '#deleteScreenshot', function(e) {
     e.preventDefault();
     e.stopPropagation();
     api('deleteScreenshot', { id: $('#screenshotModalPreview').data('id') }, res => {
@@ -433,7 +433,7 @@ $(document).on('dragleave', '.itemDropZone', function(e){
     $(this).removeClass('drag-over');
 });
 
-$(document).on('drop', '.itemDropZone', function (e) {
+$(document).on('drop', '.itemDropZone', function(e) {
     e.preventDefault();
     e.stopPropagation();
     $(this).removeClass('drag-over');
@@ -503,7 +503,7 @@ function setViewState(view = 'list') {
         .addClass('view-' + view);
 }
 
-$('.view-toggle').on('click', function () {
+$('.view-toggle').on('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
     $('.sidebar').removeClass('show');
