@@ -62,7 +62,9 @@ switch($action){
         if($_POST['title'] == "" || $_POST['content'] == "") {
             $result = getWebTitle($_POST['url']);
             if($_POST['title'] == "" && isset($result['title'])) $_POST['title'] = $result['title'];
+            if($_POST['title'] == "") $_POST['title'] = $result['host'];
             if($_POST['content'] == "" && isset($result['description'])) $_POST['content'] = $result['description'];
+            if($_POST['content'] == "") $_POST['content'] = "-";
         }
 
         $data['items'][] = [
@@ -271,6 +273,7 @@ function getWebTitle(string $url): array
         $result['description'] = trim($descNode->getAttribute('content'));
     }
 
+    $result['host'] = $parsed['host'];
     return $result;
 }
 

@@ -189,6 +189,15 @@ body {
     max-width: 100%;
 }
 
+.item-main a, .item-main a:visited {
+    text-decoration: none;
+    color: var(--bs-primary);
+    font-weight: 600;
+}
+.item-main a:hover {
+    color: var(--bs-secondary);
+}
+
 .item-title {
     display: block;
     font-size: 1.2rem;
@@ -275,6 +284,13 @@ body {
     flex-direction: column;
     justify-content: center;
     height: 100%;
+}
+
+#itemList.view-grid .item-img {
+    transition: filter 0.2s ease;;
+}
+#itemList.view-grid .list-group-item:hover .item-img {
+    filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 9px #fff);
 }
 
 #itemList.view-grid .item-main {
