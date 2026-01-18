@@ -2,6 +2,7 @@
 // Global State
 // ======================
 let currentCategory = null;
+let currentView = null;
 let editmodeCategory = false;
 
 // ======================
@@ -37,8 +38,8 @@ function renderCategory(c) {
             <span class="category-name">${title}</span>
         </div>
         <div class="list-hover-actions">
-            <i class="bi bi-pencil text-warning pointer edit-category"></i>
-            <i class="bi bi-trash  text-danger  pointer delete-category"></i>
+            <i class="bi bi-pencil text-warning action-dark pointer edit-category"></i>
+            <i class="bi bi-trash  text-danger  action-dark pointer delete-category"></i>
         </div>
     </li>`;
 }
@@ -50,8 +51,8 @@ function createCategoryEditHtml(title='', icon='bi-folder') {
             <span   class="category-icon inline-edit m-1" contenteditable="true" title="Icon">${icon}</span>
         </div>
         <div class="list-hover-actions">
-            <i class="bi bi-check-lg text-success pointer save-category"></i>
-            <i class="bi bi-x-lg     text-danger  pointer cancel-category"></i>
+            <i class="bi bi-check-lg text-success action-dark pointer save-category"></i>
+            <i class="bi bi-x-lg     text-danger  action-dark pointer cancel-category"></i>
         </div>
     `;
 }
@@ -69,10 +70,10 @@ function renderItem(i) {
             <img src="${i.preview}" class="item-preview">
         </div>
         <div class="list-hover-actions">
-            <i class="bi bi-pencil             text-warning pointer item-act-edit"></i>
-            <i class="bi bi-arrow-left-square  text-info    pointer item-act-icon"       title="Get Icon"></i>
-            <i class="bi bi-arrow-right-square text-info    pointer item-act-screenshot" title="Take Screenshot"></i>
-            <i class="bi bi-trash              text-danger  pointer item-act-delete""></i>
+            <i class="bi bi-pencil             text-warning action-dark pointer item-act-edit"></i>
+            <i class="bi bi-arrow-left-square  text-info    action-dark pointer item-act-icon"       title="Get Icon"></i>
+            <i class="bi bi-arrow-right-square text-info    action-dark pointer item-act-screenshot" title="Take Screenshot"></i>
+            <i class="bi bi-trash              text-danger  action-dark pointer item-act-delete""></i>
         </div>
     </li>`;
 }
@@ -89,8 +90,8 @@ function createItemEditHtml(title='', content='', image='', url='', preview='') 
         <img src="${preview}" class="item-preview itemDropZone" id="itemPrev">
     </div>
     <div class="list-hover-actions">
-        <i class="bi bi-check-lg text-success pointer save-item"></i>
-        <i class="bi bi-x-lg     text-danger  pointer cancel-item"></i>
+        <i class="bi bi-check-lg text-success action-dark pointer save-item"></i>
+        <i class="bi bi-x-lg     text-danger  action-dark pointer cancel-item"></i>
     </div>
     `;
 }
@@ -122,6 +123,7 @@ function loadCategories() {
             }
             if(!currentCategory) {
                 currentCategory = c.id;
+                currentView = c.view;
                 loadItems(c.id, c.view);
             }
             $('#c_' + title_id).append(renderCategory(c))
@@ -146,6 +148,7 @@ $(document).on('click', '#categoryList li', function(e) {
     const view = $(this).data('view');
     if(id) {
         currentCategory = id;
+        currentView = view;
         $("#categoryList").find("li.category-active").removeClass("category-active");   
         $(this).addClass('category-active');
         $('.sidebar').removeClass('show');
@@ -274,7 +277,7 @@ $(document).on('click', '.save-item', function(e) {
         data: formData,
         processData: false,
         contentType: false,
-        success: () => loadItems(currentCategory)
+        success: () => loadItems(currentCategory, currentView)
     });
     else
     $.ajax({
@@ -283,7 +286,7 @@ $(document).on('click', '.save-item', function(e) {
         data: formData,
         processData: false,
         contentType: false,
-        success: () => loadItems(currentCategory)
+        success: () => loadItems(currentCategory, currentView)
     });
 });
 
@@ -291,7 +294,7 @@ $(document).on('click', '.save-item', function(e) {
 $(document).on('click', '.cancel-item', function(e){
     e.preventDefault();
     e.stopPropagation();
-    loadItems(currentCategory);
+    loadItems(currentCategory, currentView);
 });
 
 // Edit Item
@@ -320,7 +323,7 @@ $(document).on('click', '.item-act-delete', function(e){
     $('.sidebar').removeClass('show');
     const li = $(this).closest('li');
     if(!confirm('Eintrag löschen?')) return;
-    api('deleteItem', { id: li.data('id') }, () => loadItems(currentCategory));
+    api('deleteItem', { id: li.data('id') }, () => loadItems(currentCategory, currentView));
 });
 
 $(document).on('click', '.item-act-icon', function(e) {
@@ -342,7 +345,7 @@ $(document).on('click', '.icon-img', function(e) {
     e.preventDefault();
     e.stopPropagation();
     api('setIcon', { id: $('#iconLists').attr('data-id'), url: $(this).attr('src') }, () => {
-        loadItems(currentCategory);
+        loadItems(currentCategory, currentView);
         $('#iconModal').modal('hide');
     });
 });
@@ -387,7 +390,7 @@ $(document).on('click', '#saveScreenshot', function(e) {
             data: formData,
             processData: false,
             contentType: false,
-            success: () => {$('#screenshotModal').modal('hide'); loadItems(currentCategory);}
+            success: () => {$('#screenshotModal').modal('hide'); loadItems(currentCategory, currentView);}
         });
     } else {
         alert('Error: Missing Screenshot!');
@@ -412,7 +415,7 @@ $(document).on('click', '#deleteScreenshot', function(e) {
     e.stopPropagation();
     api('deleteScreenshot', { id: $('#screenshotModalPreview').data('id') }, res => {
         $('#screenshotModal').modal('hide');
-        loadItems(currentCategory);
+        loadItems(currentCategory, currentView);
     });
 });
 
@@ -482,7 +485,7 @@ $(document).on('dragleave', '.category-dragndrop-item', function(e) {
 $(document).on('drop', '.category-dragndrop-item', function(e) {
     $(this).removeClass('category-dragover');
     api('updateItemCategory', { id: draggedItemId, category_id: $(this).data('id') }, () => {
-        loadItems(currentCategory);
+        loadItems(currentCategory, currentView);
         $('#iconModal').modal('hide');
     });
 });

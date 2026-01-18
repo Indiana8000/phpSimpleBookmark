@@ -81,7 +81,7 @@ TopCategory/SubCategory
 ### Images
 
 * Icons and preview images can be set manually while editing
-* Simply drag & drop an image file onto the corresponding field while editing
+* Simply drag & drop an image file onto the corresponding field
 
 ---
 
