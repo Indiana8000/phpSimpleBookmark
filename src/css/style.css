@@ -1,30 +1,40 @@
 /* Layout */
 :root {
-    --primary-color: #fff;
-    --primary-background: #1d1e1f;
-    --secondary-color: #000;
-    --secondary-background: #ccc;
-    --selected-background: #3d3e3f;
-    --image-background: #666;
-    --title-background: #3d3e3f40;
-    --title-highlite: #3d3e3f;
-}
-body {
-    background: var(--secondary-color);
-    overflow: hidden;
+    --sbm-color-primary:        #ffffff;
+    --sbm-background-primary:   #111111;
+
+    --sbm-color-secondary:      #000000;
+    --sbm-background-secondary: #cccccc;
+
+    --sbm-background-selected:  #3d3e3f;
+    --sbm-background-image:     #666666;
+
+    --sbm-background-title:     #3d3e3f40;
+    --sbm-background-highlight: #3d3e3f;
+
+    --safe-top: env(safe-area-inset-top);
 }
 
+
+
 /* Main Panels */
+body {
+    padding-top: var(--safe-top);
+    background: var(--sbm-background-primary);
+    overflow: hidden;
+}
 .sidebar {
     width: 240px;
     height: 100vh;
+    height: 100svh;
     position: fixed;
     left: 0;
     top: 0;
     padding: 0.7rem;
     overflow-y: auto;
-    background: var(--primary-background);
-    color: var(--primary-color);
+    color: var(--sbm-color-primary);
+    background: var(--sbm-color-secondary);
+    border-right: 1px solid var(--sbm-background-image);
     z-index: 10;
     transition:
         transform 0.2s ease;
@@ -32,6 +42,7 @@ body {
 .content {
     margin-left: 240px;
     height: 100vh;
+    height: 100svh;
     padding: 1.3rem;
     overflow-y: auto;
 }
@@ -45,7 +56,8 @@ body {
     align-items: center;
     gap: 1rem;
     position: relative;
-    background-color: var(--secondary-background);
+    color: var(--sbm-background-primary);
+    background-color: var(--sbm-background-secondary);
     padding: 0.3rem;
 }
 
@@ -67,7 +79,7 @@ body {
 
     transition:
         opacity .15s ease,
-        visibility 0s linear .15s; /* Verzögerung beim Ausblenden */
+        visibility 0s linear .15s;
 }
 /* Action Icons - Hover Effect */
 .list-group-item:hover .list-hover-actions {
@@ -75,11 +87,11 @@ body {
     visibility: visible;
     pointer-events: auto;
 
-    transition-delay: .3s;
+    transition-delay: .9s;
 }
 .action-dark {
     padding: 4px 3px;
-    background-color: var(--primary-background);
+    background-color: var(--sbm-background-primary);
     border: 1px solid var(--bs-border-color);
     border-radius: 4px;
 }
@@ -111,12 +123,12 @@ body {
 /* Custom Category Style */
 .category-active {
     font-weight: bold;
-    color: var(--primary-color);
-    background: var(--selected-background);
+    color: var(--sbm-color-primary);
+    background: var(--sbm-background-selected);
 }
 .category-dragover {
-    color: var(--primary-color) !important;
-    background-color: darkgreen !important;
+    color: var(--sbm-color-primary) !important;
+    background-color: var(--bs-success) !important;
 }
 
 
@@ -128,7 +140,7 @@ body {
     padding: 2px 6px;
     border-radius: 4px;
     background: rgba(255, 255, 255, 0.1);
-    color: var(--primary-color);
+    color: var(--sbm-color-primary);
     width: 100%;
 }
 .inline-edit:focus {
@@ -136,7 +148,7 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 .editing {
-    background: black;
+    background: var(--sbm-background-primary);
 }
 .list-group-item.editing .list-hover-actions {
     opacity: 1;
@@ -153,8 +165,8 @@ body {
     border-radius: 4px;
     margin-right: 8px;
     flex-shrink: 0;
-    /* border: 1px solid var(--selected-background); */
-    /* background: var(--image-background); */
+    /* border: 1px solid var(--sbm-background-selected); */
+    /* background: var(--sbm-background-image); */
 }
 
 .item-preview {
@@ -164,8 +176,8 @@ body {
     border-radius: 4px;
     margin-left: 8px;
     flex-shrink: 0;
-    border: 1px solid var(--selected-background);
-    background: var(--image-background); 
+    border: 1px solid var(--sbm-background-selected);
+    background: var(--sbm-background-image);
     display: inline-block;
 }
 
@@ -183,7 +195,7 @@ body {
     font-weight: 600;
 }
 .item-main a:hover {
-    color: var(--bs-secondary);
+    color: var(--bs-primary-text-emphasis);
 }
 
 .item-title {
@@ -204,8 +216,8 @@ body {
     border-radius: 4px;
     margin-left: 8px;
 
-    border: 1px solid var(--selected-background);
-    background: var(--image-background); 
+    border: 1px solid var(--sbm-background-selected);
+    background: var(--sbm-background-image); 
 
     max-width: 256px;
     max-height: 256px;;
@@ -217,25 +229,24 @@ body {
 
 /* Drag & Drop File */
 .itemDropZone {
-    border: 2px dashed blue;
+    border: 3px dashed var(--bs-primary);
     border-radius: 4px;
     padding: 2px;
 }
 
 .drag-over {
-    border: 2px solid lime;
+    border: 3px solid var(--bs-success);
 }
 
 
 
-
+/* View-List <-> View-Grid */
 #toggleToolBar {
     position: fixed;
     bottom: 12px;
     right: 12px;
 }
 
-/* View-List <-> View-Grid */
 #itemList {
     transition: all .2s ease;
 }
@@ -265,7 +276,7 @@ body {
     padding: 6px;
     border-radius: 4px;
     border: 0;
-    background-color: #111;
+    background-color: unset;
 }
 
 #itemList.view-grid .list-content-item {
@@ -278,7 +289,7 @@ body {
     transition: filter 0.2s ease;;
 }
 #itemList.view-grid .list-group-item:hover .item-img {
-    filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 9px #fff);
+    filter: drop-shadow(0 0 3px var(--sbm-color-primary)) drop-shadow(0 0 9px var(--sbm-color-primary));
 }
 
 #itemList.view-grid .item-main {
@@ -287,14 +298,14 @@ body {
     padding: 0.3rem;
     width: 100%;
     overflow: hidden;
-    color: var(--primary-color);
-    text-shadow: 1px 1px 2px black;
-    background-color: var(--title-background);
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
+    color: var(--sbm-color-primary);
+    text-shadow: 1px 1px 2px var(--sbm-color-secondary);
+    background-color: var(--sbm-background-title);
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 #itemList.view-grid .list-group-item:hover .item-main {
-    background-color: var(--title-highlite);
+    background-color: var(--sbm-background-highlight);
 }
 
 #itemList.view-grid .item-img,
