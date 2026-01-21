@@ -32,7 +32,7 @@ apk add --no-cache \
 Starting the X server:
 ```
 Xvfb :99 -screen 0 1920x1080x24 &
-export DISPLAY=:99`
+export DISPLAY=:99
 ```
 
 Options if no GPU available
@@ -51,3 +51,9 @@ rm -rf /tmp/profile-tmp1
 The --headless is optional as the XServer is exlusivly for librewolf.
 
 You can change the --window-size=1920,1080 e.g. to --window-size=1920,5000 to capture longer webpages.
+
+
+Example of how to create a screen shot of the howl XServer (Require ImageMagic)
+```
+DISPLAY=:99 import -window root screenshot.png
+```
