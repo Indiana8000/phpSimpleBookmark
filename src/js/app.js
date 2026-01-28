@@ -520,6 +520,17 @@ $('#exportBookmarks').on('click', function(e) {
     window.location = 'api.php?action=exportBookmarks';
 });
 
+$('#bookmarkDrop').on('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.onchange = function (event) {
+        uploadBookmark(event.target.files[0]);
+    };
+    fileInput.click();
+});
+
 $('#bookmarkDrop').on('dragover', function(e){
     e.preventDefault();
     e.stopPropagation();
@@ -537,7 +548,10 @@ $('#bookmarkDrop').on('drop', function(e) {
     e.stopPropagation();
     $(this).removeClass('btn-outline-warning');
 
-    let file = e.originalEvent.dataTransfer.files[0];
+    uploadBookmark(e.originalEvent.dataTransfer.files[0])
+});
+
+function uploadBookmark(file) {
     if(!file) return;
 
     if(!file.name.endsWith('.html')) {
@@ -558,8 +572,7 @@ $('#bookmarkDrop').on('drop', function(e) {
             location.reload();
         }
     });
-});
-
+}
 
 
 // ======================
