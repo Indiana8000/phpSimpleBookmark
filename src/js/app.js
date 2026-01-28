@@ -5,6 +5,8 @@ let currentCategory = null;
 let currentView = null;
 let editmodeCategory = false;
 
+
+
 // ======================
 // API Helper
 // ======================
@@ -28,8 +30,8 @@ function renderCategoryTitle(id, title) {
 }
 
 function renderCategory(c) {
-    let title = c.name.split("/", 2);
-    if(title.length > 1) title = title[1];
+    let title = c.name.split("/");
+    if(title.length > 1) title = title.slice(1).join("/");
     else title = '-';
     return `
     <li class="list-group-item category-dragndrop-item pointer" data-id="${c.id}" data-view="${c.view}" data-icon="${c.icon}">
@@ -105,6 +107,7 @@ function renderIcon(i) {
 }
 
 
+
 // ======================
 // Load Data
 // ======================
@@ -140,6 +143,8 @@ function loadItems(categoryId, view) {
         $('#itemList').parent().animate({scrollTop: 0}, 350);
     });
 }
+
+
 
 // ======================
 // Category Handling
@@ -221,6 +226,8 @@ $(document).on('click', '.delete-category', function(e){
     }
     api('deleteCategory', { id: li.data('id') }, loadCategories);
 });
+
+
 
 // ======================
 // Items Handling
@@ -327,6 +334,7 @@ $(document).on('click', '.item-act-delete', function(e){
     api('deleteItem', { id: li.data('id') }, () => loadItems(currentCategory, currentView));
 });
 
+// Fetch Icons
 $(document).on('click', '.item-act-icon', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -342,6 +350,8 @@ $(document).on('click', '.item-act-icon', function(e) {
         $('#iconModal .modal-title').html('Select Icon');
     });
 });
+
+// Select Icon from Modal
 $(document).on('click', '.icon-img', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -351,6 +361,7 @@ $(document).on('click', '.icon-img', function(e) {
     });
 });
 
+// Fetch Preview
 $(document).on('click', '.item-act-screenshot', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -375,6 +386,8 @@ $(document).on('click', '.item-act-screenshot', function(e) {
         }
     });
 });
+
+// Save Screenshot
 $(document).on('click', '#saveScreenshot', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -398,6 +411,7 @@ $(document).on('click', '#saveScreenshot', function(e) {
     }
 });
 
+// Show Screenshot
 $(document).on('click', '.item-preview', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -411,6 +425,8 @@ $(document).on('click', '.item-preview', function(e) {
     $('#screenshotModalPreview').attr('src', $(this).attr('src'));
     $('#screenshotModal').modal('show');
 });
+
+// Delete Screenshot
 $(document).on('click', '#deleteScreenshot', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -468,6 +484,7 @@ $(document).on('dragstart', '.content-dragndrop-item', function(e) {
     e.originalEvent.dataTransfer.effectAllowed = 'move';
     console.log("dragstart - " + draggedItemId);
 });
+
 $(document).on('dragend', '.content-dragndrop-item', function(e) {
     draggedItemId = null;
 });
@@ -477,6 +494,7 @@ $(document).on('dragover', '.category-dragndrop-item', function(e) {
     e.stopPropagation();
     $(this).addClass('category-dragover');
 });
+
 $(document).on('dragleave', '.category-dragndrop-item', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -494,7 +512,58 @@ $(document).on('drop', '.category-dragndrop-item', function(e) {
 
 
 // ======================
-// 
+// Export / Import
+// ======================
+$('#exportBookmarks').on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location = 'api.php?action=exportBookmarks';
+});
+
+$('#bookmarkDrop').on('dragover', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).addClass('btn-outline-warning');
+});
+
+$('#bookmarkDrop').on('dragleave', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).removeClass('btn-outline-warning');
+});
+
+$('#bookmarkDrop').on('drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).removeClass('btn-outline-warning');
+
+    let file = e.originalEvent.dataTransfer.files[0];
+    if(!file) return;
+
+    if(!file.name.endsWith('.html')) {
+        alert('Only bookmark html allowed');
+        return;
+    }
+
+    let fd = new FormData();
+    fd.append('file',file);
+
+    $.ajax({
+        url:'api.php?action=importBookmarks',
+        method:'POST',
+        data:fd,
+        contentType:false,
+        processData:false,
+        success:()=>{
+            location.reload();
+        }
+    });
+});
+
+
+
+// ======================
+// View Toggle
 // ======================
 function setViewState(view = 'list') {
     // Set Toggle-Button

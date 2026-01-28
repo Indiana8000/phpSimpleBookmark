@@ -21,9 +21,10 @@ class Storage
     private int    $maxBackups = 50;
 
     private ?array $cache = null;
+    private int    $countLevel = 0;
 
     public function __construct(
-        string $dataFile = __DIR__ . '/data.json',
+        string $dataFile = __DIR__ . '/backups/data.json',
         string $backupDir = __DIR__ . '/backups'
     ) {
         $this->dataFile  = $dataFile;
@@ -126,6 +127,24 @@ class Storage
         return false;
     }
 
+    private function findOrCreateCategory(string $path, array &$data): int
+    {
+        if (!$path)
+            throw new RuntimeException('Missing category name!');
+
+        foreach ($data['categories'] as $c) {
+            if ($c['name'] === $path) return $c['id'];
+        }
+
+        $id = $this->nextId($data['categories']);
+        $data['categories'][] = [
+            'id'=>$id,
+            'name'=>$path,
+            'icon'=>'bi-folder'
+        ];
+        return $id;
+    }
+
     /* ==========================================================
      * Validation
      * ======================================================== */
@@ -222,7 +241,7 @@ class Storage
             'items'      => [
                 [
                     "id" => 1,
-                    "category_id" => "1",
+                    "category_id" => 1,
                     "title" => "Example Entry: Google",
                     "url" => "https://www.google.com/",
                     "content" => "Google Search",
@@ -232,4 +251,126 @@ class Storage
             ]
         ];
     }
+
+    public function exportBookmarks(string $filename = 'bookmarks.html'): void
+    {
+        $data = $this->load();
+
+        header('Content-Type: text/html; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        echo "<!DOCTYPE NETSCAPE-Bookmark-file-1>\n";
+        echo "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=UTF-8\">\n";
+        echo "<TITLE>Bookmarks</TITLE>\n";
+        echo "<H1>Bookmarks</H1>\n";
+        echo "<DL><p>\n";
+
+        foreach ($data['categories'] as $cat) {
+            echo "<DT><H3>" . htmlspecialchars($cat['name']) . "</H3>\n";
+            echo "<DL><p>\n";
+
+            foreach ($data['items'] as $item) {
+                if ($item['category_id'] !== $cat['id']) continue;
+
+                $iconAttr = '';
+                if (!empty($item['image'])) {
+                    $path = __DIR__.'/'.$item['image'];
+                    if (file_exists($path)) {
+                        $mime = mime_content_type($path);
+                        $base64 = base64_encode(file_get_contents($path));
+                        $iconAttr = ' ICON="data:'.$mime.';base64,'.$base64.'"';
+                    }
+                }
+
+                $url   = htmlspecialchars($item['url'] ?? '#');
+                $title = htmlspecialchars($item['title'] ?? 'Untitled');
+                $desc  = htmlspecialchars($item['content'] ?? '');
+                echo "<DT><A$iconAttr HREF=\"$url\" DESCRIPTION=\"$desc\">$title</A>\n";
+            }
+
+            echo "</DL><p>\n";
+        }
+
+        echo "</DL><p>\n";
+        exit;
+    }
+
+    public function importBookmarks(string $file)
+    {
+        $html = file_get_contents($file);
+        $html = str_replace('</A>', '</A></DT>', $html);
+
+        $dir = __DIR__ . "/uploads/thumb/";
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+        libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        $dl = $dom->getElementsByTagName('dl')->item(0);
+        $data = $this->load();
+        $this->countLevel = 0;
+        $this->importBookmarkNode($dl, '', $data);
+        $this->save($data);
+    }
+
+    private function importBookmarkNode($node, string $path, array &$data)
+    {
+        $this->countLevel++;
+        foreach ($node->childNodes as $child) {
+            if ($child->nodeName === 'dt') {
+                $dtChild = $child->firstElementChild;
+                if ($dtChild->nodeName === 'h3') {
+                    $name = trim($dtChild->textContent);
+                    $newPath = $path ? "$path/$name" : $name;
+                    error_log(str_repeat('  ', $this->countLevel) . "==> " . $newPath);
+
+                    $next = $child->nextElementSibling;
+
+                    if ($next && $next->nodeName === 'dl') {
+                        $this->importBookmarkNode($next, $newPath, $data);
+                    }
+                } else if ($dtChild->nodeName === 'a' && $path !== '') {
+                    $url    = $dtChild->getAttribute('href');
+                    $title  = trim($dtChild->textContent);
+                    $desc   = $dtChild->getAttribute('description');
+                    error_log(str_repeat('  ', $this->countLevel) . "--> " . $title);
+
+                    $newPath = $path;
+                    if(!str_contains($newPath, '/')) $newPath .= "/001 - Root";
+                    $catId  = $this->findOrCreateCategory($newPath, $data);
+                    $itemId = $this->nextId($data['items']);
+
+                    $item = [
+                        'id' => $itemId,
+                        'category_id' => $catId,
+                        'title' => $title,
+                        'url' => $url,
+                        'content' => $desc,
+                        'image' => '',
+                        'preview' => ''
+                    ];
+
+                    // ICON
+                    $icon = $dtChild->getAttribute('icon');
+                    if ($icon && str_starts_with($icon,'data:')) {
+                        if (preg_match('/data:(.*);base64,(.*)/',$icon,$m)) {
+                            $ext = explode('/',$m[1])[1] ?? 'png';
+                            $bin = base64_decode($m[2]);
+
+                            $file = "uploads/thumb/$itemId.$ext";
+                            file_put_contents(__DIR__.'/'.$file, $bin);
+
+                            $item['image'] = $file;
+                        }
+                    }
+                    $data['items'][] = $item;
+                }
+            }
+        }
+        $this->countLevel--;
+    }
+
+
+
 }

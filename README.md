@@ -43,11 +43,12 @@ Do **not** expose this application to the public internet.
 1. Copy all files from the `src` directory into any directory within your web server’s document root (e.g. `htdocs`, `www`).
 2. Ensure the following are writable by the web server:
 
-   * `data.json`
    * `uploads/` directory
    * `backups/` directory
 
 That’s it – no database setup required.
+
+_Important!_ If you upgrade from older version, the data.json had been moved into the backups folder (less write permissions needed).
 
 ---
 

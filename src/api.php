@@ -69,7 +69,7 @@ switch($action){
 
         $data['items'][] = [
             'id' => $id,
-            'category_id' => $_POST['category_id'],
+            'category_id' => intval($_POST['category_id']),
             'title' => $_POST['title'],
             'url' => $_POST['url'],
             'content' => $_POST['content'],
@@ -109,7 +109,7 @@ switch($action){
     case 'updateItemCategory':
         foreach ($data['items'] as &$i) {
             if ($i['id'] == $input['id']) {
-                $i['category_id'] = $input['category_id'];
+                $i['category_id'] = intval($input['category_id']);
             }
         }
         $storage->save($data);
@@ -182,6 +182,15 @@ switch($action){
         }
         echo json_encode(true);
         break;
+
+    case 'exportBookmarks':
+        $storage->exportBookmarks();
+        break;
+    case 'importBookmarks':
+        $storage->importBookmarks($_FILES['file']['tmp_name']);
+        echo json_encode(['ok'=>true]);
+        break;
+
     default: http_response_code(400); echo json_encode(['error'=>'Unknown action']);
 }
 
