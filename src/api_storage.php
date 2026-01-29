@@ -45,13 +45,19 @@ class Storage
             return $this->cache;
         }
 
-        if (!file_exists($this->dataFile)) {
-            $this->cache = $this->emptyStructure();
-            return $this->cache;
+        // Use new data.json
+        if (file_exists($this->dataFile)) {
+            $json = file_get_contents($this->dataFile);
+            $data = json_decode($json, true);
+        // Fallback old data.json
+        } else if (file_exists(__DIR__ . '/data.json')) {
+            $json = file_get_contents(__DIR__ . '/data.json');
+            $data = json_decode($json, true);
+            rename(__DIR__ . '/data.json', $this->dataFile);
+        // Fallback to backup
+        } else {
+            $data = null;
         }
-
-        $json = file_get_contents($this->dataFile);
-        $data = json_decode($json, true);
 
         if ($data === null) {
             $data = $this->restoreFromBackup();

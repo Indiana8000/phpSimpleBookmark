@@ -36,8 +36,13 @@ body {
     background: var(--sbm-color-secondary);
     border-right: 1px solid var(--sbm-background-image);
     z-index: 10;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     transition:
         transform 0.2s ease;
+}
+.sidebar::-webkit-scrollbar {
+  display: none;
 }
 .content {
     margin-left: 240px;

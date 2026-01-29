@@ -48,8 +48,6 @@ Do **not** expose this application to the public internet.
 
 That’s it – no database setup required.
 
-_Important!_ If you upgrade from older version, the data.json had been moved into the backups folder (less write permissions needed).
-
 ---
 
 ## 👥 Multi‑User Setup (Optional)
