@@ -78,7 +78,9 @@ async function acceptCookieBanner(page) {
             '.onetrust-banner-holder',
             '.ot-sdk-container',
             '.vtl-cb-main-widget',
-            '.shopify-pc__banner__dialog'
+            '.shopify-pc__banner__dialog',
+            '.qc-cmp-cleanslate',
+            '#cookies-banner'
         ];
         onetrustSelectors.forEach(selector => {
             const el = document.querySelector(selector);
