@@ -1,8 +1,8 @@
 # Screenshot Server
 
-Example of a simple solution. I run this python script with LibreWolf on Alpine Linux inside a LXC container on my ProxMox home lab. Using Debian/Ubuntu should be similar.
+Example of a simple solution. I run this python script `server.py` with LibreWolf on Alpine Linux inside a LXC container on my ProxMox home lab. Using Debian/Ubuntu should be similar.
 
-More complex solution would be running FireFox/LibreWolf in "Marionette" Mode and wait until all javascript is executed. Maybe even clicking on cockie banners.
+More complex solution see `server.mjs` which use nodejs + puppeteer + chromium
 
 
 ## Alpine Linux
@@ -25,6 +25,13 @@ apk add --no-cache \
   libxinerama \
   libxcursor \
   libxfixes
+```
+
+### Autostart
+
+Add to crontab:
+```
+@reboot /usr/bin/python3 /root/server.py >&- 2>&-
 ```
 
 ### Manual Testing
