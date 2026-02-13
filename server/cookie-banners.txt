@@ -1,0 +1,11 @@
+#onetrust-consent-sdk
+#onetrust-banner-sdk
+#onetrust-cookie-policy-sdk
+.onetrust-pc-dark-filter
+.onetrust-banner-holder
+.ot-sdk-container
+.vtl-cb-main-widget
+.shopify-pc__banner__dialog
+.qc-cmp-cleanslate
+#cookies-banner
+#cookie-law-info-bar

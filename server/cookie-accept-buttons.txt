@@ -1,0 +1,6 @@
+#onetrust-accept-btn-handler
+button[title="Accept All"]
+button[aria-label*="accept"]
+.shopify-pc__banner__btn-accept
+.cookie_action_close_header
+.vtl-cb-main-widget__accept-button

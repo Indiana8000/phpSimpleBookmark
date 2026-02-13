@@ -19,9 +19,21 @@ import { connect } from 'puppeteer-real-browser';
 import autoconsent from '@duckduckgo/autoconsent/extra';
 import http from 'http';
 import { URL } from 'url';
+import fs from 'fs';
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 8080;
 const TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 55000;
+
+// Load cookie banner and accept button selectors from external files
+const cookieBannerElements = fs.readFileSync(new URL('./cookie-banners.txt', import.meta.url), 'utf-8')
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
+const cookieAcceptButtonSelectors = fs.readFileSync(new URL('./cookie-accept-buttons.txt', import.meta.url), 'utf-8')
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
 
 async function takeScreenshot(targetUrl) {
     const { page } = await connect({
@@ -68,34 +80,22 @@ async function takeScreenshot(targetUrl) {
 }
 
 async function acceptCookieBanner(page) {
-    await page.evaluate(() => {
-        // Remove OneTrust and similar cookie banners
-        const onetrustSelectors = [
-            '#onetrust-consent-sdk',
-            '#onetrust-banner-sdk',
-            '#onetrust-cookie-policy-sdk',
-            '.onetrust-pc-dark-filter',
-            '.onetrust-banner-holder',
-            '.ot-sdk-container',
-            '.vtl-cb-main-widget',
-            '.shopify-pc__banner__dialog',
-            '.qc-cmp-cleanslate',
-            '#cookies-banner'
-        ];
-        onetrustSelectors.forEach(selector => {
+    await page.evaluate((bannerSelectors, acceptSelectors) => {
+        // Remove cookie banners
+        bannerSelectors.forEach(selector => {
             const el = document.querySelector(selector);
             if (el) el.remove(); // alternative: el.style.display = 'none';
         });
 
         // Attempt to click "Accept" buttons if removal didn't work
-        const acceptButton = document.querySelector('#onetrust-accept-btn-handler') ||
-                            document.querySelector('button[title="Accept All"]') ||
-                            document.querySelector('button[aria-label*="accept"]') ||
-                            document.querySelector('.shopify-pc__banner__btn-accept') ||
-                            document.querySelector('.vtl-cb-main-widget__accept-button');
-
-        if (acceptButton) acceptButton.click();
-    });
+        for (const selector of acceptSelectors) {
+            const button = document.querySelector(selector);
+            if (button) {
+                button.click();
+                break;
+            }
+        }
+    }, cookieBannerElements, cookieAcceptButtonSelectors);
 }
 
 const server = http.createServer(async (req, res) => {

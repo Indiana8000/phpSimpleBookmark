@@ -1,4 +1,19 @@
 #!/usr/bin/env python3
+#
+# Simple screenshot server using LibreWolf and Xvfb
+#
+# Usage:
+#   python3 server.py
+#
+# Example request:
+#   http://localhost:8080/?url=https://example.com
+#
+# Alpine Linux setup example:
+#   apk add librewolf python3 xvfb dbus ttf-freefont font-noto mesa-dri-gallium mesa-gl libxcomposite libxdamage libxrandr libxtst libxinerama libxcursor libxfixes
+#
+# Crontab:
+#   @reboot /usr/bin/python3 /root/server.py >&- 2>&-
+#
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
