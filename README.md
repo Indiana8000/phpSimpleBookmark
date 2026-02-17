@@ -13,6 +13,7 @@ The application stores all data in a local JSON file – no database required. I
 (if title or desciption is empty while creating or modifing the entry)
 * Drag & drop bookmarks between categories
 * Optional preview images (manual or automated)
+* Import / Export as Netscape Bookmark File
 
 ---
 
@@ -75,7 +76,7 @@ TopCategory/SubCategory
 
 ### Category of Bookmarks
 
-* Bookmarks can be moved between subcategories via drag & drop
+* Bookmarks can be moved between subcategories via drag & drop onto the category
 
 ### Images
 
