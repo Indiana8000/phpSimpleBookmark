@@ -291,6 +291,8 @@ class Storage
     public function exportBookmarks(string $filename = 'bookmarks.html'): void
     {
         $data = $this->load();
+        usort($data['categories'], function ($a, $b) {return strnatcasecmp($a['name'],$b['name']);});
+        usort($data['items'], function ($a, $b) {return strnatcasecmp($a['title'],$b['title']);});
 
         header('Content-Type: text/html; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');

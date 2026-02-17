@@ -23,7 +23,13 @@ switch($action){
         echo json_encode(true);
         break;
     case 'updateCategory':
-        foreach($data['categories'] as &$c) if($c['id']==$input['id']) { $c['name']=$input['name']; $c['icon']=$input['icon']; $c['modified_at']=date('c'); }
+        foreach($data['categories'] as &$c)
+            if($c['id'] == $input['id']) {
+                $c['name'] = $input['name'];
+                $c['icon'] = $input['icon'];
+                $c['modified_at'] = date('c');
+                if($c['created_at'] == null) $c['created_at'] = $c['modified_at'];
+            }
         $storage->save($data);
         echo json_encode(true);
         break;
@@ -98,6 +104,7 @@ switch($action){
                 $i['content'] = $_POST['content'];
                 $i['url'] = $_POST['url'];
                 $i['modified_at'] = date('c');
+                if($i['created_at'] == null) $i['created_at'] = $i['modified_at'];
 
                 if (!empty($_FILES['image'])) {
                     $i['image']   = saveItemImage($i['id'], $_FILES['image']  , 'thumb');
