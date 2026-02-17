@@ -52,6 +52,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # Project specific
-backups/data*.json
-uploads/*/
-
+src/backups/
+!src/backups/.gitkeep
+src/uploads/
+!src/uploads/.gitkeep
