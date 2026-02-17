@@ -17,12 +17,13 @@ switch($action){
         echo json_encode($data['categories']); break;
     case 'addCategory':
         $id = $storage->nextId($data['categories']); // $id = time();
-        $data['categories'][] = ['id'=>$id,'name'=>$input['name'],'icon'=>$input['icon']??'bi-folder','view'=>'list'];
+        $now = date('c');
+        $data['categories'][] = ['id'=>$id,'name'=>$input['name'],'icon'=>$input['icon']??'bi-folder','view'=>'list','created_at'=>$now,'modified_at'=>$now];
         $storage->save($data);
         echo json_encode(true);
         break;
     case 'updateCategory':
-        foreach($data['categories'] as &$c) if($c['id']==$input['id']) { $c['name']=$input['name']; $c['icon']=$input['icon']; }
+        foreach($data['categories'] as &$c) if($c['id']==$input['id']) { $c['name']=$input['name']; $c['icon']=$input['icon']; $c['modified_at']=date('c'); }
         $storage->save($data);
         echo json_encode(true);
         break;
@@ -67,6 +68,7 @@ switch($action){
             if($_POST['content'] == "") $_POST['content'] = "-";
         }
 
+        $now = date('c');
         $data['items'][] = [
             'id' => $id,
             'category_id' => intval($_POST['category_id']),
@@ -74,7 +76,9 @@ switch($action){
             'url' => $_POST['url'],
             'content' => $_POST['content'],
             'image' => $imagePath,
-            'preview' => $previewPath
+            'preview' => $previewPath,
+            'created_at' => $now,
+            'modified_at' => $now
         ];
 
         $storage->save($data);
@@ -93,6 +97,7 @@ switch($action){
                 $i['title'] = $_POST['title'];
                 $i['content'] = $_POST['content'];
                 $i['url'] = $_POST['url'];
+                $i['modified_at'] = date('c');
 
                 if (!empty($_FILES['image'])) {
                     $i['image']   = saveItemImage($i['id'], $_FILES['image']  , 'thumb');
@@ -110,6 +115,7 @@ switch($action){
         foreach ($data['items'] as &$i) {
             if ($i['id'] == $input['id']) {
                 $i['category_id'] = intval($input['category_id']);
+                $i['modified_at'] = date('c');
             }
         }
         $storage->save($data);
@@ -137,6 +143,7 @@ switch($action){
         foreach ($data['items'] as &$i) {
             if ($i['id'] == $input['id']) {
                 $i['image'] = downloadItemImage($i['id'], $input['url'], 'thumb');
+                $i['modified_at'] = date('c');
             }
         }
         $storage->save($data);
@@ -162,6 +169,7 @@ switch($action){
             if ($i['id'] == $_POST['id']) {
                 if (!empty($_POST['preview'])) {
                     $i['preview'] = saveItemImage($i['id'], base64_decode($_POST['preview']), 'preview');
+                    $i['modified_at'] = date('c');
                     $storage->save($data);
                     echo json_encode(true);
                 } else {

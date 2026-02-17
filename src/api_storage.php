@@ -143,10 +143,13 @@ class Storage
         }
 
         $id = $this->nextId($data['categories']);
+        $now = date('c');
         $data['categories'][] = [
             'id'=>$id,
             'name'=>$path,
-            'icon'=>'bi-folder'
+            'icon'=>'bi-folder',
+            'created_at'=>$now,
+            'modified_at'=>$now
         ];
         return $id;
     }
@@ -229,19 +232,40 @@ class Storage
      * Helpers
      * ======================================================== */
 
+    private function dateToTimestamp(?string $dateString): ?int
+    {
+        if (!$dateString) return null;
+        try {
+            $dt = new DateTime($dateString);
+            return $dt->getTimestamp();
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    private function timestampToDate(int $timestamp): string
+    {
+        return date('c', $timestamp);
+    }
+
     private function emptyStructure(): array
     {
+        $now = date('c');
         return [
             'categories' => [
                 [
                     "id" => 1,
                     "name" => "General/General",
-                    "icon" => "bi-stars"
+                    "icon" => "bi-stars",
+                    "created_at" => $now,
+                    "modified_at" => $now
                 ],
                 [
                     "id" => 2,
                     "name" => "General/News",
-                    "icon" => "bi-folder"
+                    "icon" => "bi-folder",
+                    "created_at" => $now,
+                    "modified_at" => $now
                 ]
             ],
             'items'      => [
@@ -252,11 +276,17 @@ class Storage
                     "url" => "https://www.google.com/",
                     "content" => "Google Search",
                     "image" => "",
-                    "preview" => ""
+                    "preview" => "",
+                    "created_at" => $now,
+                    "modified_at" => $now
                 ]
             ]
         ];
     }
+
+    /* ==========================================================
+     * Export / Import (Netscape Bookmark Format)
+     * ======================================================== */
 
     public function exportBookmarks(string $filename = 'bookmarks.html'): void
     {
@@ -272,7 +302,12 @@ class Storage
         echo "<DL><p>\n";
 
         foreach ($data['categories'] as $cat) {
-            echo "<DT><H3>" . htmlspecialchars($cat['name']) . "</H3>\n";
+            $catAddDate = $this->dateToTimestamp($cat['created_at'] ?? null);
+            $catModDate = $this->dateToTimestamp($cat['modified_at'] ?? null);
+            $catDateAttr = '';
+            if ($catAddDate) $catDateAttr .= ' ADD_DATE="' . $catAddDate . '"';
+            if ($catModDate) $catDateAttr .= ' LAST_MODIFIED="' . $catModDate . '"';
+            echo "<DT><H3$catDateAttr>" . htmlspecialchars($cat['name']) . "</H3>\n";
             echo "<DL><p>\n";
 
             foreach ($data['items'] as $item) {
@@ -288,10 +323,16 @@ class Storage
                     }
                 }
 
+                $addDate = $this->dateToTimestamp($item['created_at'] ?? null);
+                $modDate = $this->dateToTimestamp($item['modified_at'] ?? null);
+                $dateAttr = '';
+                if ($addDate) $dateAttr .= ' ADD_DATE="' . $addDate . '"';
+                if ($modDate) $dateAttr .= ' LAST_MODIFIED="' . $modDate . '"';
+
                 $url   = htmlspecialchars($item['url'] ?? '#');
                 $title = htmlspecialchars($item['title'] ?? 'Untitled');
                 $desc  = htmlspecialchars($item['content'] ?? '');
-                echo "<DT><A$iconAttr HREF=\"$url\" DESCRIPTION=\"$desc\">$title</A>\n";
+                echo "<DT><A$iconAttr$dateAttr HREF=\"$url\" DESCRIPTION=\"$desc\">$title</A>\n";
             }
 
             echo "</DL><p>\n";
@@ -327,6 +368,7 @@ class Storage
             if ($child->nodeName === 'dt') {
                 $dtChild = $child->firstElementChild;
                 if ($dtChild->nodeName === 'h3') {
+                    // Category
                     $name = trim($dtChild->textContent);
                     $newPath = $path ? "$path/$name" : $name;
                     error_log(str_repeat('  ', $this->countLevel) . "==> " . $newPath);
@@ -337,16 +379,33 @@ class Storage
                         $this->importBookmarkNode($next, $newPath, $data);
                     }
                 } else if ($dtChild->nodeName === 'a' && $path !== '') {
+                    // Item
                     $url    = $dtChild->getAttribute('href');
                     $title  = trim($dtChild->textContent);
                     $desc   = $dtChild->getAttribute('description');
                     error_log(str_repeat('  ', $this->countLevel) . "--> " . $title);
 
+                    // Ensure category exists (create if not) and get its ID
                     $newPath = $path;
                     if(!str_contains($newPath, '/')) $newPath .= "/001 - Root";
                     $catId  = $this->findOrCreateCategory($newPath, $data);
                     $itemId = $this->nextId($data['items']);
 
+                    // Get timestamps from attributes if available (Netscape Bookmark Format)
+                    $now = date('c');
+                    $created_at = $now;
+                    $modified_at = $now;
+
+                    $addDate = $dtChild->getAttribute('add_date');
+                    $lastMod = $dtChild->getAttribute('last_modified');
+                    if ($addDate) {
+                        $created_at = $this->timestampToDate(intval($addDate));
+                    }
+                    if ($lastMod) {
+                        $modified_at = $this->timestampToDate(intval($lastMod));
+                    }
+
+                    // Create item with extracted data
                     $item = [
                         'id' => $itemId,
                         'category_id' => $catId,
@@ -354,10 +413,12 @@ class Storage
                         'url' => $url,
                         'content' => $desc,
                         'image' => '',
-                        'preview' => ''
+                        'preview' => '',
+                        'created_at' => $created_at,
+                        'modified_at' => $modified_at
                     ];
 
-                    // ICON
+                    // Extract ICON attribute if it's a data URI
                     $icon = $dtChild->getAttribute('icon');
                     if ($icon && str_starts_with($icon,'data:')) {
                         if (preg_match('/data:(.*);base64,(.*)/',$icon,$m)) {
