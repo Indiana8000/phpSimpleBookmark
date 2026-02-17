@@ -140,7 +140,7 @@ function loadItems(categoryId, view) {
         $('#itemList').empty();
         setViewState(view);
         res.forEach(i => $('#itemList').append(renderItem(i)));
-        $('#itemList').parent().animate({scrollTop: 0}, 350);
+        //$('#itemList').parent().animate({scrollTop: 0}, 350);
     });
 }
 
