@@ -60,13 +60,20 @@ function createCategoryEditHtml(title='', icon='bi-folder') {
 }
 
 function renderItem(i) {
+    const formattedDate = i.modified_at ? new Date(i.modified_at).toLocaleDateString(navigator.language, { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    }) : '';
     return `
     <li class="list-group-item content-dragndrop-item" draggable="true" data-id="${i.id}">
         <div class="list-content list-content-item">
             <img src="${i.image}" class="item-img">
             <div class="item-main">
                 <strong class="item-title  ">${i.title}</strong>
-                <small  class="item-url    "><a href="${i.url}" target="_blank">${i.url}</a></small>
+                <small  class="item-url    "><a href="${i.url}" target="_blank">${i.url}</a><span class="item-modified">${formattedDate}</span></small>
                 <span   class="item-content">${i.content}</span>
             </div>
             <img src="${i.preview}" class="item-preview">
