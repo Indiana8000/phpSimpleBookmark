@@ -256,7 +256,7 @@ $(document).on('click', '#itemList li', function(e) {
     e.stopPropagation();
     $('.sidebar').removeClass('show');
     if(!$(this).hasClass('editing')) {
-        const url = $(this).find('.item-url').text().trim();
+        const url = $(this).find('.item-url a').attr('href');
         window.open(url, '_blank');
     }
 });
