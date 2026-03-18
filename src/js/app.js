@@ -319,7 +319,7 @@ $(document).on('click', '.item-act-edit', function(e){
     $('.sidebar').removeClass('show');
     const li = $(this).closest('li');
     const title = li.find('.item-title').text();
-    const url = li.find('.item-url').text();
+    const url = li.find('.item-url a').text();
     const content = li.find('.item-content').text();
     const image = li.find('img.item-img').attr('src');
     const preview = li.find('img.item-preview').attr('src');
