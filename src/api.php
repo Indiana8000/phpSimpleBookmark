@@ -336,6 +336,21 @@ function getFaviconsByQuality(string $url): array
         $result = parseWebpage($baseUrl, $baseUrl);
     }
 
+    // Fallback: /favicon.ico
+    if(count($result) == 0) {
+        $fallback = $baseUrl . '/favicon.ico';
+        if(curlGetImageSize($fallback)) {
+            $size = curlGetImageSize($fallback);
+            $result[] = [
+                'url'    => $fallback,
+                'width'  => $size[0],
+                'height' => $size[1],
+                'area'   => $size[0] * $size[1],
+                'type'   => $size['mime'] ?? null
+            ];
+        }
+    }
+
     return $result;
 }
 
@@ -386,6 +401,7 @@ function parseWebpage(string $url, string $baseUrl): array
                 $href = rtrim($url, '/') . '/' . $href;
             }
         }
+        error_log("Found icon link: $href (rel: $rel)");
 
         // Bildgröße ermitteln
         $size = curlGetImageSize($href);

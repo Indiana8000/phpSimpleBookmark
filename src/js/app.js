@@ -20,7 +20,14 @@ function api(action, data = {}, cb) {
     });
 }
 
-
+function isValidUrl(url) {
+    try {
+        const u = new URL(url);
+        return u.protocol === 'http:' || u.protocol === 'https:';
+    } catch {
+        return false;
+    }
+}
 
 // ======================
 // Render Functions
@@ -292,6 +299,13 @@ $(document).on('click', '.save-item', function(e) {
     e.stopPropagation();
     const li = $(this).closest('li');
     const id = li.data('id');
+
+    const url = li.find('.item-url').text().trim();
+    if(!isValidUrl(url)) {
+        alert('Please enter a valid URL (e.g. https://example.com).');
+        li.find('.item-url').focus();
+        return;
+    }
 
     const formData = new FormData();
     formData.append('action', li.data('id') ? 'updateItem' : 'addItem');

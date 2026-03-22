@@ -1,6 +1,5 @@
 <?php
 
-
 function parseUrlAndFile($url) {
     $web = parse_url($url);
     if ($web === false) return false;
@@ -74,8 +73,13 @@ function curlGetImageSize($url): ?array {
 
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     if ($httpCode >= 400) {
-        error_log('cURL http error: ' . $httpCode);
+        error_log('cURL http error: ' . $httpCode . ' for URL: ' . $url);
         return null;
+    }
+
+    $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    if (str_contains((string)$contentType, 'svg') || isSvgContent($data)) {
+        return parseSvgSize($data);
     }
 
     $info = @getimagesizefromstring($data);
@@ -84,6 +88,48 @@ function curlGetImageSize($url): ?array {
     }
 
     return $info;
+}
+
+function isSvgContent(string $data): bool {
+    $trimmed = ltrim($data);
+    return str_contains($trimmed, '<svg') && (
+        str_starts_with($trimmed, '<svg') ||
+        str_starts_with($trimmed, '<?xml')
+    );
+}
+
+function parseSvgSize(string $data): ?array {
+    libxml_use_internal_errors(true);
+    $xml = simplexml_load_string($data);
+    libxml_clear_errors();
+    if ($xml === false) {
+        return null;
+    }
+
+    $attrs = $xml->attributes();
+    $width = 0;
+    $height = 0;
+
+    if (isset($attrs['width']) && isset($attrs['height'])) {
+        $width = (int) $attrs['width'];
+        $height = (int) $attrs['height'];
+    }
+
+    if (($width === 0 || $height === 0) && isset($attrs['viewBox'])) {
+        $parts = preg_split('/[\s,]+/', trim((string)$attrs['viewBox']));
+        if (count($parts) === 4) {
+            $width = (int) $parts[2];
+            $height = (int) $parts[3];
+        }
+    }
+
+    return [
+        0       => $width,
+        1       => $height,
+        2       => -1,
+        3       => "width=\"$width\" height=\"$height\"",
+        'mime'  => 'image/svg+xml',
+    ];
 }
 
 ?>
