@@ -168,7 +168,7 @@ function renderItemGroups(items, view = 'list') {
 
     const sortedKeys = Object.keys(groups).map(Number).sort((a, b) => a - b);
     sortedKeys.forEach(gKey => {
-        const ul = $(`<ul class="list-group item-group mb-2" data-group="${gKey}"></ul>`);
+        const ul = $(`<ul class="list-group item-group mb-3" data-group="${gKey}"></ul>`);
         groups[gKey].forEach(i => ul.append(renderItem(i)));
         $('#itemList').append(ul);
     });
@@ -700,10 +700,10 @@ $('.view-toggle').on('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
     $('.sidebar').removeClass('show');
-    const view = $(this).data('view');
-    setViewState(view);
-    api('updateCategoryView', { id: currentCategory, view: view }, () => {
-        $('#categoryList .list-group-item[data-id=' + currentCategory + ']').data('view', view);
+    currentView = $(this).data('view');
+    setViewState(currentView);
+    api('updateCategoryView', { id: currentCategory, view: currentView }, () => {
+        $('#categoryList .list-group-item[data-id=' + currentCategory + ']').data('view', currentView);
     });
 });
 

@@ -362,10 +362,9 @@ body {
 .item-group-new {
     border: 2px dashed var(--sbm-background-selected);
     border-radius: 4px;
-    min-height: 36px;
+    min-height: 42px;
     text-align: center;
     color: var(--sbm-background-selected);
-    margin-top: 0.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -376,7 +375,6 @@ body {
     transition: opacity 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.item-group-new:hover,
 .item-group-new.group-dragover {
     opacity: 1;
     border-color: var(--bs-primary);
