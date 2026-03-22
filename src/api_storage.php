@@ -133,24 +133,31 @@ class Storage
         return false;
     }
 
-    private function findOrCreateCategory(string $path, array &$data): int
+    private function findOrCreateCategory(string $path, array &$data, string $icon = 'bi-folder', string $view = ''): int
     {
         if (!$path)
             throw new RuntimeException('Missing category name!');
 
-        foreach ($data['categories'] as $c) {
-            if ($c['name'] === $path) return $c['id'];
+        foreach ($data['categories'] as &$c) {
+            if ($c['name'] === $path) {
+                if ($icon && $icon !== 'bi-folder') $c['icon'] = $icon;
+                if ($view) $c['view'] = $view;
+                return $c['id'];
+            }
         }
+        unset($c);
 
         $id = $this->nextId($data['categories']);
         $now = date('c');
-        $data['categories'][] = [
+        $cat = [
             'id'=>$id,
             'name'=>$path,
-            'icon'=>'bi-folder',
+            'icon'=>$icon ?: 'bi-folder',
             'created_at'=>$now,
             'modified_at'=>$now
         ];
+        if ($view) $cat['view'] = $view;
+        $data['categories'][] = $cat;
         return $id;
     }
 
@@ -309,6 +316,8 @@ class Storage
             $catDateAttr = '';
             if ($catAddDate) $catDateAttr .= ' ADD_DATE="' . $catAddDate . '"';
             if ($catModDate) $catDateAttr .= ' LAST_MODIFIED="' . $catModDate . '"';
+            if (!empty($cat['icon']))  $catDateAttr .= ' ICON_CLASS="' . htmlspecialchars($cat['icon']) . '"';
+            if (!empty($cat['view']))  $catDateAttr .= ' VIEW="' . htmlspecialchars($cat['view']) . '"';
             echo "<DT><H3$catDateAttr>" . htmlspecialchars($cat['name']) . "</H3>\n";
             echo "<DL><p>\n";
 
@@ -330,6 +339,7 @@ class Storage
                 $dateAttr = '';
                 if ($addDate) $dateAttr .= ' ADD_DATE="' . $addDate . '"';
                 if ($modDate) $dateAttr .= ' LAST_MODIFIED="' . $modDate . '"';
+                if (isset($item['group'])) $dateAttr .= ' GROUP="' . intval($item['group']) . '"';
 
                 $url   = htmlspecialchars($item['url'] ?? '#');
                 $title = htmlspecialchars($item['title'] ?? 'Untitled');
@@ -375,9 +385,14 @@ class Storage
                     $newPath = $path ? "$path/$name" : $name;
                     error_log(str_repeat('  ', $this->countLevel) . "==> " . $newPath);
 
+                    $iconClass = $dtChild->getAttribute('icon_class') ?: 'bi-folder';
+                    $view      = $dtChild->getAttribute('view') ?: '';
+
                     $next = $child->nextElementSibling;
 
                     if ($next && $next->nodeName === 'dl') {
+                        // Pre-create/update the category so view+icon are set before processing children
+                        $this->findOrCreateCategory($newPath, $data, $iconClass, $view);
                         $this->importBookmarkNode($next, $newPath, $data);
                     }
                 } else if ($dtChild->nodeName === 'a' && $path !== '') {
@@ -419,6 +434,9 @@ class Storage
                         'created_at' => $created_at,
                         'modified_at' => $modified_at
                     ];
+
+                    $groupAttr = $dtChild->getAttribute('group');
+                    if ($groupAttr !== '') $item['group'] = intval($groupAttr);
 
                     // Extract ICON attribute if it's a data URI
                     $icon = $dtChild->getAttribute('icon');
