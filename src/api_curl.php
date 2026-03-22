@@ -3,12 +3,16 @@
 
 function parseUrlAndFile($url) {
     $web = parse_url($url);
-    $file = pathinfo($web['path']);
+    if ($web === false) return false;
+    $file = isset($web['path']) ? pathinfo($web['path']) : [];
     return array_merge($web, $file);
 }
 
 function setupCurlHandle(string $url, bool $header = false): CurlHandle {
     $ch = curl_init($url);
+    if ($ch === false) {
+        throw new \RuntimeException('curl_init failed for URL: ' . $url);
+    }
 
     curl_setopt($ch, CURLOPT_REFERER, $url);
     curl_setopt($ch, CURLOPT_TIMEOUT, 25);
@@ -39,18 +43,23 @@ function setupCurlHandle(string $url, bool $header = false): CurlHandle {
 function curlDownoadHTML(string $url): ?string {
     $ch = setupCurlHandle($url, true);
     $html = curl_exec($ch);
-    if(curl_errno($ch))
+    if (curl_errno($ch))
         error_log('cURL error: ' . curl_error($ch));
-    return $html;
+    return $html === false ? null : $html;
 }
 
 function curlDownloadFile($url, $fullFilePath): bool {
     $ch = setupCurlHandle($url, false);
-    curl_setopt($ch, CURLOPT_FILE, fopen($fullFilePath, 'w+'));
-
+    $fp = fopen($fullFilePath, 'w+');
+    if ($fp === false) {
+        error_log('Failed to open file for writing: ' . $fullFilePath);
+        return false;
+    }
+    curl_setopt($ch, CURLOPT_FILE, $fp);
     $data = curl_exec($ch);
-    if(curl_errno($ch))
+    if (curl_errno($ch))
         error_log('cURL error: ' . curl_error($ch));
+    fclose($fp);
     return $data !== false;
 }
 
