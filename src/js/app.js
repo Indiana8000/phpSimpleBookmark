@@ -144,11 +144,31 @@ function loadCategories() {
 
 function loadItems(categoryId, view) {
     api('getItems', { category_id: categoryId }, res => {
-        $('#itemList').empty();
-        setViewState(view);
-        res.forEach(i => $('#itemList').append(renderItem(i)));
-        //$('#itemList').parent().animate({scrollTop: 0}, 350);
+        renderItemGroups(res, view);
     });
+}
+
+function renderItemGroups(items, view = 'list') {
+    $('#itemList').empty();
+    setViewState(view);
+
+    const groups = {};
+    items.forEach(i => {
+        const g = i.group ?? 0;
+        if (!groups[g]) groups[g] = [];
+        groups[g].push(i);
+    });
+
+    const sortedKeys = Object.keys(groups).map(Number).sort((a, b) => a - b);
+    sortedKeys.forEach(gKey => {
+        const ul = $(`<ul class="list-group item-group mb-2" data-group="${gKey}"></ul>`);
+        groups[gKey].forEach(i => ul.append(renderItem(i)));
+        $('#itemList').append(ul);
+    });
+
+    if (items.length > 0) {
+        $('#itemList').append('<div class="item-group-new" data-group="new"><i class="bi bi-plus-circle"></i> New Group</div>');
+    }
 }
 
 
@@ -247,7 +267,12 @@ $('#addItem').on('click', function(e) {
     const li = $('<li class="list-group-item editing"></li>');
     setViewState();
     li.html(createItemEditHtml());
-    $('#itemList').prepend(li);
+    let firstGroup = $('#itemList .item-group').first();
+    if (firstGroup.length === 0) {
+        firstGroup = $('<ul class="list-group item-group mb-2" data-group="0"></ul>');
+        $('#itemList').prepend(firstGroup);
+    }
+    firstGroup.prepend(li);
     li.find('.item-url').focus();
 });
 
@@ -494,6 +519,8 @@ $(document).on('dragstart', '.content-dragndrop-item', function(e) {
 
 $(document).on('dragend', '.content-dragndrop-item', function(e) {
     draggedItemId = null;
+    $('ul.item-group').removeClass('group-dragover');
+    $('.item-group-new').removeClass('group-dragover');
 });
 
 $(document).on('dragover', '.category-dragndrop-item', function(e) {
@@ -513,6 +540,65 @@ $(document).on('drop', '.category-dragndrop-item', function(e) {
     api('updateItemCategory', { id: draggedItemId, category_id: $(this).data('id') }, () => {
         loadItems(currentCategory, currentView);
         $('#iconModal').modal('hide');
+    });
+});
+
+
+
+// ======================
+// Items Handling - Drag n Drop Group
+// ======================
+$(document).on('dragover', 'ul.item-group', function(e) {
+    if (!draggedItemId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).addClass('group-dragover');
+});
+
+$(document).on('dragleave', 'ul.item-group', function(e) {
+    const related = e.originalEvent.relatedTarget;
+    if (!related || !$.contains(this, related)) {
+        $(this).removeClass('group-dragover');
+    }
+});
+
+$(document).on('drop', 'ul.item-group', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).removeClass('group-dragover');
+    if (!draggedItemId) return;
+    const targetGroup = parseInt($(this).data('group'));
+    const sourceLi = $('#itemList').find(`li[data-id="${draggedItemId}"]`);
+    const sourceGroup = parseInt(sourceLi.closest('ul.item-group').data('group') ?? 0);
+    if (targetGroup === sourceGroup) return;
+    api('updateItemGroup', { id: draggedItemId, group: targetGroup }, () => {
+        loadItems(currentCategory, currentView);
+    });
+});
+
+$(document).on('dragover', '.item-group-new', function(e) {
+    if (!draggedItemId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).addClass('group-dragover');
+});
+
+$(document).on('dragleave', '.item-group-new', function(e) {
+    $(this).removeClass('group-dragover');
+});
+
+$(document).on('drop', '.item-group-new', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).removeClass('group-dragover');
+    if (!draggedItemId) return;
+    let maxGroup = 0;
+    $('#itemList .item-group').each(function() {
+        const g = parseInt($(this).data('group'));
+        if (g > maxGroup) maxGroup = g;
+    });
+    api('updateItemGroup', { id: draggedItemId, group: maxGroup + 1 }, () => {
+        loadItems(currentCategory, currentView);
     });
 });
 

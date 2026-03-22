@@ -51,8 +51,14 @@ switch($action){
         echo json_encode(true);
         break;
     case 'getItems':
-        usort($data['items'], function ($a, $b) {return strnatcasecmp($a['title'],$b['title']);});
-        echo json_encode(array_values(array_filter($data['items'],fn($i)=>$i['category_id']==$input['category_id'])));
+        $items = array_values(array_filter($data['items'], fn($i) => $i['category_id'] == $input['category_id']));
+        usort($items, function ($a, $b) {
+            $ga = $a['group'] ?? 0;
+            $gb = $b['group'] ?? 0;
+            if ($ga !== $gb) return $ga - $gb;
+            return strnatcasecmp($a['title'], $b['title']);
+        });
+        echo json_encode($items);
         break;
     case 'addItem':
         $id = $storage->nextId($data['items']); // $id = time();
@@ -78,6 +84,7 @@ switch($action){
         $data['items'][] = [
             'id' => $id,
             'category_id' => intval($_POST['category_id']),
+            'group' => 0,
             'title' => $_POST['title'],
             'url' => $_POST['url'],
             'content' => $_POST['content'],
@@ -122,6 +129,17 @@ switch($action){
         foreach ($data['items'] as &$i) {
             if ($i['id'] == $input['id']) {
                 $i['category_id'] = intval($input['category_id']);
+                $i['modified_at'] = date('c');
+            }
+        }
+        $storage->save($data);
+        echo json_encode(true);
+        break;
+
+    case 'updateItemGroup':
+        foreach ($data['items'] as &$i) {
+            if ($i['id'] == $input['id']) {
+                $i['group'] = intval($input['group']);
                 $i['modified_at'] = date('c');
             }
         }

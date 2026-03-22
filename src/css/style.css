@@ -283,10 +283,13 @@ body {
 }
 
 /* View-Grid */
-#itemList.view-grid {
+#itemList.view-grid .item-group {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
     gap: 1rem;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
 }
 
 #itemList.view-grid .list-group-item {
@@ -347,6 +350,38 @@ body {
     line-height: 1.2;
 }
 
+
+
+/* Groups */
+.item-group.group-dragover {
+    outline: 2px dashed var(--bs-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.item-group-new {
+    border: 2px dashed var(--sbm-background-selected);
+    border-radius: 4px;
+    min-height: 36px;
+    text-align: center;
+    color: var(--sbm-background-selected);
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    gap: 0.4rem;
+    opacity: 0.35;
+    cursor: default;
+    transition: opacity 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.item-group-new:hover,
+.item-group-new.group-dragover {
+    opacity: 1;
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+}
 
 #itemList.view-grid .list-hover-actions {
     position: absolute;
