@@ -285,6 +285,8 @@ body {
 /* View-Grid */
 #itemList.view-grid .item-group {
     display: grid;
+    width: 100%;
+    min-width: 0;
     grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
     gap: 1rem;
     border-radius: 0;
