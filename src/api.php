@@ -3,7 +3,7 @@ header('Content-Type: application/json');
 $input  = json_decode(file_get_contents('php://input'), true);
 $action = $_GET['action'] ?? '';
 
-$screenshotURL = "http://192.168.5.15:8080/?url=%s";
+$screenshotURL = "http://librewolf.bluepaw.service:8080/?url=%s";
 
 require_once 'api_storage.php';
 require_once 'api_curl.php';
