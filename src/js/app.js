@@ -3,7 +3,7 @@
 // ======================
 let currentCategory = null;
 let currentView = null;
-let editmodeCategory = false;
+let isCategoryEditMode = false;
 const CATEGORY_STORAGE_KEY = 'psb.currentCategory';
 
 
@@ -33,23 +33,23 @@ function setCategoryIdInSession(categoryId) {
 // ======================
 
 // Sends a JSON POST request to api.php
-// action: API action (e.g. 'getCategories')
-// data:   optional payload as an object
-// cb:     callback function receiving the server response
-function api(action, data = {}, cb) {
+// action:   API action (e.g. 'getCategories')
+// data:     optional payload as an object
+// callback: callback function receiving the server response
+function api(action, data = {}, callback) {
     $.ajax({
         url: 'api.php?action=' + action,
         method: 'POST',
         data: JSON.stringify(data),
         contentType: 'application/json',
-        success: cb
+        success: callback
     });
 }
 
-function isValidUrl(url) {
+function isValidURL(url) {
     try {
-        const u = new URL(url);
-        return u.protocol === 'http:' || u.protocol === 'https:';
+        const parsedURL = new URL(url);
+        return parsedURL.protocol === 'http:' || parsedURL.protocol === 'https:';
     } catch {
         return false;
     }
@@ -62,15 +62,15 @@ function renderCategoryTitle(id, title) {
     return `<h5 class="mb-1">${title}</h5><ul id="c_${id}" class="list-group mb-2"></ul>`;
 }
 
-function renderCategory(c) {
+function renderCategory(category) {
     // Category names use the format "Group/Name" – only display the part after the slash
-    let title = c.name.split("/");
+    let title = category.name.split("/");
     if(title.length > 1) title = title.slice(1).join("/");
     else title = '-';
     return `
-    <li class="list-group-item category-dragndrop-item pointer" data-id="${c.id}" data-view="${c.view}" data-icon="${c.icon}">
+    <li class="list-group-item category-dragndrop-item pointer" data-id="${category.id}" data-view="${category.view}" data-icon="${category.icon}">
         <div class="list-content">
-            <i class="bi ${c.icon} category-icon"></i>
+            <i class="bi ${category.icon} category-icon"></i>
             <span class="category-name">${title}</span>
         </div>
         <div class="list-hover-actions">
@@ -80,7 +80,7 @@ function renderCategory(c) {
     </li>`;
 }
 
-function createCategoryEditHtml(title='', icon='bi-folder') {
+function renderCategoryForm(title='', icon='bi-folder') {
     return `
         <div class="list-content">
             <strong class="category-name inline-edit m-1" contenteditable="true" title="Title">${title}</strong>
@@ -93,8 +93,8 @@ function createCategoryEditHtml(title='', icon='bi-folder') {
     `;
 }
 
-function renderItem(i) {
-    const formattedDate = i.modified_at ? new Date(i.modified_at).toLocaleDateString(navigator.language, { 
+function renderItem(item) {
+    const formattedDate = item.modified_at ? new Date(item.modified_at).toLocaleDateString(navigator.language, { 
         year: 'numeric', 
         month: '2-digit', 
         day: '2-digit', 
@@ -102,15 +102,15 @@ function renderItem(i) {
         minute: '2-digit' 
     }) : '';
     return `
-    <li class="list-group-item content-dragndrop-item" draggable="true" data-id="${i.id}">
+    <li class="list-group-item content-dragndrop-item" draggable="true" data-id="${item.id}">
         <div class="list-content list-content-item">
-            <img src="${i.image}" class="item-img">
+            <img src="${item.image}" class="item-img">
             <div class="item-main">
-                <strong class="item-title  ">${i.title}</strong>
-                <small  class="item-url    "><a href="${i.url}" target="_blank">${i.url}</a><span class="item-modified">${formattedDate}</span></small>
-                <span   class="item-content">${i.content}</span>
+                <strong class="item-title  ">${item.title}</strong>
+                <small  class="item-url    "><a href="${item.url}" target="_blank">${item.url}</a><span class="item-modified">${formattedDate}</span></small>
+                <span   class="item-content">${item.content}</span>
             </div>
-            <img src="${i.preview}" class="item-preview">
+            <img src="${item.preview}" class="item-preview">
         </div>
         <div class="list-hover-actions">
             <i class="bi bi-pencil             text-warning action-dark pointer item-act-edit"></i>
@@ -121,7 +121,7 @@ function renderItem(i) {
     </li>`;
 }
 
-function createItemEditHtml(title='', content='', image='', url='', preview='') {
+function renderItemForm(title='', content='', image='', url='', preview='') {
     return `
     <div class="list-content list-content-item">
         <img src="${image}" class="item-img itemDropZone" id="itemImg">
@@ -139,11 +139,11 @@ function createItemEditHtml(title='', content='', image='', url='', preview='') 
     `;
 }
 
-function renderIcon(i) {
-    const filename = i.url.substring(i.url.lastIndexOf('/') + 1, i.url.indexOf('?') > 0 ? i.url.indexOf('?') : i.url.length);
+function renderIcon(icon) {
+    const filename = icon.url.substring(icon.url.lastIndexOf('/') + 1, icon.url.indexOf('?') > 0 ? icon.url.indexOf('?') : icon.url.length);
     return `
     <li class="list-group-item">
-        <img class="icon-img pointer" src="${i.url}"> ${filename} - ${i.width} x ${i.height}
+        <img class="icon-img pointer" src="${icon.url}"> ${filename} - ${icon.width} x ${icon.height}
     </li>`;
 }
 
@@ -167,23 +167,23 @@ function loadCategories() {
         // Last active category: restore from current state or from SessionStorage
         const desiredCategory = currentCategory ?? getCategoryIdFromSession();
 
-        let title = "";
-        let title_id = 1;
+        let titleText = "";
+        let titleId = 1;
         // Group categories into sections by their prefix ("Group/Name")
-        res.forEach(c => {
-            let x = c.name.split("/");
-            c.view = c.view ?? 'list';
-            if(x[0] != title) {
+        res.forEach(category => {
+            let nameParts = category.name.split("/");
+            category.view = category.view ?? 'list';
+            if(nameParts[0] != titleText) {
                 // New group detected – insert section heading
-                title = x[0];
-                title_id++;
-                $('#categoryList').append(renderCategoryTitle(title_id, title));
+                titleText = nameParts[0];
+                titleId++;
+                $('#categoryList').append(renderCategoryTitle(titleId, titleText));
             }
-            $('#c_' + title_id).append(renderCategory(c))
+            $('#c_' + titleId).append(renderCategory(category))
         });
 
         // Select the desired category, falling back to the first available
-        const selectedCategory = res.find(c => c.id === desiredCategory) ?? res[0];
+        const selectedCategory = res.find(category => category.id === desiredCategory) ?? res[0];
         currentCategory = selectedCategory.id;
         currentView = selectedCategory.view;
         setCategoryIdInSession(currentCategory);
@@ -205,17 +205,17 @@ function renderItemGroups(items, view = 'list') {
 
     // Collect items by group number (0 = default)
     const groups = {};
-    items.forEach(i => {
-        const g = i.group ?? 0;
-        if (!groups[g]) groups[g] = [];
-        groups[g].push(i);
+    items.forEach(item => {
+        const groupKey = item.group ?? 0;
+        if (!groups[groupKey]) groups[groupKey] = [];
+        groups[groupKey].push(item);
     });
 
     // Render groups in ascending order to preserve their sequence
     const sortedKeys = Object.keys(groups).map(Number).sort((a, b) => a - b);
-    sortedKeys.forEach(gKey => {
-        const ul = $(`<ul class="list-group item-group mb-3" data-group="${gKey}"></ul>`);
-        groups[gKey].forEach(i => ul.append(renderItem(i)));
+    sortedKeys.forEach(groupKey => {
+        const ul = $(`<ul class="list-group item-group mb-3" data-group="${groupKey}"></ul>`);
+        groups[groupKey].forEach(item => ul.append(renderItem(item)));
         $('#itemList').append(ul);
     });
 
@@ -235,10 +235,10 @@ function renderItemGroups(items, view = 'list') {
 $('#addCategory').on('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
-    if(editmodeCategory) return;
-    editmodeCategory = true;
+    if(isCategoryEditMode) return;
+    isCategoryEditMode = true;
     const li = $('<li class="list-group-item list-group-item-dark editing"></li>');
-    li.html(createCategoryEditHtml());
+    li.html(renderCategoryForm());
 
     if(currentCategory) $("#categoryList").find(`[data-id='${currentCategory}']`).closest('ul').append(li);
     else $('#categoryList ul:last').append(li);
@@ -264,11 +264,11 @@ $(document).on('click', '#categoryList li', function(e) {
 $(document).on('click', '.edit-category', function(e){
     e.preventDefault();
     e.stopPropagation();
-    if(editmodeCategory) return;
-    editmodeCategory = true;
+    if(isCategoryEditMode) return;
+    isCategoryEditMode = true;
     const li = $(this).closest('li');
     li.addClass('editing');
-    li.html(createCategoryEditHtml(li.find('.category-name').text(), li.data('icon')));
+    li.html(renderCategoryForm(li.find('.category-name').text(), li.data('icon')));
     li.find('.category-name').focus();
 });
 
@@ -276,7 +276,7 @@ $(document).on('click', '.edit-category', function(e){
 $(document).on('click', '.save-category', function(e) {
     e.preventDefault();
     e.stopPropagation();
-    editmodeCategory = false;
+    isCategoryEditMode = false;
     const li = $(this).closest('li');
     const id = li.data('id');
     const icon = li.find('.category-icon').text().trim();
@@ -293,7 +293,7 @@ $(document).on('click', '.save-category', function(e) {
 $(document).on('click', '.cancel-category', function(e) {
     e.preventDefault();
     e.stopPropagation();
-    editmodeCategory = false;
+    isCategoryEditMode = false;
     loadCategories();
 });
 
@@ -301,7 +301,7 @@ $(document).on('click', '.cancel-category', function(e) {
 $(document).on('click', '.delete-category', function(e){
     e.preventDefault();
     e.stopPropagation();
-    if(editmodeCategory) return;
+    if(isCategoryEditMode) return;
     const li = $(this).closest('li');
     if(!confirm(`Kategorie ${li.find('.category-name').text()} löschen?`)) return;
     if(currentCategory == li.data('id')) {
@@ -326,7 +326,7 @@ $('#addItem').on('click', function(e) {
     if(!currentCategory) return alert('Active category required to add item!');
     const li = $('<li class="list-group-item editing"></li>');
     setViewState();
-    li.html(createItemEditHtml());
+    li.html(renderItemForm());
     let firstGroup = $('#itemList .item-group').first();
     if (firstGroup.length === 0) {
         firstGroup = $('<ul class="list-group item-group mb-2" data-group="0"></ul>');
@@ -361,7 +361,7 @@ $(document).on('click', '.item-act-edit', function(e){
     setViewState();
     li.attr('draggable', false);
     li.addClass('editing');
-    li.html(createItemEditHtml(title, content, image, url, preview));
+    li.html(renderItemForm(title, content, image, url, preview));
     li.find('.item-title').focus();
 });
 
@@ -373,7 +373,7 @@ $(document).on('click', '.save-item', function(e) {
     const id = li.data('id');
 
     const url = li.find('.item-url').text().trim();
-    if(!isValidUrl(url)) {
+    if(!isValidURL(url)) {
         alert('Please enter a valid URL (e.g. https://example.com).');
         li.find('.item-url').focus();
         return;
@@ -389,13 +389,13 @@ $(document).on('click', '.save-item', function(e) {
     formData.append('url', li.find('.item-url').text().trim());
 
     // Only append image files if they were set via drag-and-drop
-    const file1 = $('#itemImg').data('imageFile');
-    if(file1) {
-        formData.append('image', file1);
+    const iconFile = $('#itemImg').data('imageFile');
+    if(iconFile) {
+        formData.append('image', iconFile);
     }
-    const file2 = $('#itemPrev').data('imageFile');
-    if(file2) {
-        formData.append('preview', file2);
+    const previewFile = $('#itemPrev').data('imageFile');
+    if(previewFile) {
+        formData.append('preview', previewFile);
     }
 
     if(id) {
@@ -738,13 +738,13 @@ function uploadBookmark(file) {
         return;
     }
 
-    let fd = new FormData();
-    fd.append('file',file);
+    let formData = new FormData();
+    formData.append('file',file);
 
     $.ajax({
         url:'api.php?action=importBookmarks',
         method:'POST',
-        data:fd,
+        data:formData,
         contentType:false,
         processData:false,
         success:()=>{
