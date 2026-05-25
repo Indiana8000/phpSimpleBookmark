@@ -221,8 +221,8 @@ switch($action){
         break;
     case 'importBookmarks':
         $deleteExisting = ($_POST['deleteExisting'] ?? '0') === '1';
-        $storage->importBookmarks($_FILES['file']['tmp_name'], $deleteExisting);
-        echo json_encode(['ok'=>true]);
+        $skipped = $storage->importBookmarks($_FILES['file']['tmp_name'], $deleteExisting);
+        echo json_encode(['ok'=>true, 'skipped'=>$skipped]);
         break;
 
     default: http_response_code(400); echo json_encode(['error'=>'Unknown action']);

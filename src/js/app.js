@@ -759,7 +759,12 @@ function executeImport(deleteExisting) {
         data: formData,
         contentType: false,
         processData: false,
-        success: () => { location.reload(); }
+        success: (data) => {
+            if (data.skipped > 0) {
+                alert(`Import complete. ${data.skipped} duplicate bookmark(s) were skipped.`);
+            }
+            location.reload();
+        }
     });
 }
 

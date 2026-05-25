@@ -379,11 +379,13 @@ class Storage
         }
 
         $this->countLevel = 0;
-        $this->importBookmarkNode($dl, '', $data);
+        $skipped = 0;
+        $this->importBookmarkNode($dl, '', $data, $skipped);
         $this->save($data);
+        return $skipped;
     }
 
-    private function importBookmarkNode($node, string $path, array &$data)
+    private function importBookmarkNode($node, string $path, array &$data, int &$skipped)
     {
         $this->countLevel++;
         foreach ($node->childNodes as $child) {
@@ -403,7 +405,7 @@ class Storage
                     if ($next && $next->nodeName === 'dl') {
                         // Pre-create/update the category so view+icon are set before processing children
                         $this->findOrCreateCategory($newPath, $data, $iconClass, $view);
-                        $this->importBookmarkNode($next, $newPath, $data);
+                        $this->importBookmarkNode($next, $newPath, $data, $skipped);
                     }
                 } else if ($dtChild->nodeName === 'a' && $path !== '') {
                     // Item
@@ -417,6 +419,13 @@ class Storage
                     if(!str_contains($newPath, '/')) $newPath .= "/001 - Root";
                     $catId  = $this->findOrCreateCategory($newPath, $data);
                     $itemId = $this->nextId($data['items']);
+
+                    // Skip duplicate URLs
+                    $existingUrls = array_column($data['items'], 'url');
+                    if (in_array($url, $existingUrls)) {
+                        $skipped++;
+                        continue;
+                    }
 
                     // Get timestamps from attributes if available (Netscape Bookmark Format)
                     $now = date('c');
