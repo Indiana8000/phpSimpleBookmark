@@ -4,6 +4,27 @@
 let currentCategory = null;
 let currentView = null;
 let editmodeCategory = false;
+const CATEGORY_STORAGE_KEY = 'psb.currentCategory';
+
+
+
+// ======================
+// Session Storage for Category Persistence
+// ======================
+function getCategoryIdFromSession() {
+    const rawId = window.sessionStorage.getItem(CATEGORY_STORAGE_KEY);
+    if (!rawId) return null;
+    const parsedId = Number(rawId);
+    return Number.isInteger(parsedId) && parsedId > 0 ? parsedId : null;
+}
+
+function setCategoryIdInSession(categoryId) {
+    if (categoryId) {
+        window.sessionStorage.setItem(CATEGORY_STORAGE_KEY, String(categoryId));
+    } else {
+        window.sessionStorage.removeItem(CATEGORY_STORAGE_KEY);
+    }
+}
 
 
 
@@ -128,6 +149,17 @@ function renderIcon(i) {
 function loadCategories() {
     api('getCategories', {}, res => {
         $('#categoryList').empty();
+        if (!Array.isArray(res) || res.length === 0) {
+            currentCategory = null;
+            currentView = 'list';
+            setCategoryIdInSession(null);
+            $('#itemList').empty();
+            setViewState('list');
+            return;
+        }
+
+        const desiredCategory = currentCategory ?? getCategoryIdFromSession();
+
         let title = "";
         let title_id = 1;
         res.forEach(c => {
@@ -138,13 +170,15 @@ function loadCategories() {
                 title_id++;
                 $('#categoryList').append(renderCategoryTitle(title_id, title));
             }
-            if(!currentCategory) {
-                currentCategory = c.id;
-                currentView = c.view;
-                loadItems(c.id, c.view);
-            }
             $('#c_' + title_id).append(renderCategory(c))
         });
+
+        const selectedCategory = res.find(c => c.id === desiredCategory) ?? res[0];
+        currentCategory = selectedCategory.id;
+        currentView = selectedCategory.view;
+        setCategoryIdInSession(currentCategory);
+        loadItems(currentCategory, currentView);
+
         if(currentCategory) $("#categoryList").find(`[data-id='${currentCategory}']`).addClass('category-active');
     });
 }
@@ -189,6 +223,7 @@ $(document).on('click', '#categoryList li', function(e) {
     if(id) {
         currentCategory = id;
         currentView = view;
+        setCategoryIdInSession(currentCategory);
         $("#categoryList").find("li.category-active").removeClass("category-active");   
         $(this).addClass('category-active');
         $('.sidebar').removeClass('show');
@@ -256,6 +291,7 @@ $(document).on('click', '.delete-category', function(e){
     if(!confirm(`Kategorie ${li.find('.category-name').text()} löschen?`)) return;
     if(currentCategory == li.data('id')) {
         currentCategory = null;
+        setCategoryIdInSession(null);
         $('#itemList').empty();
     }
     api('deleteCategory', { id: li.data('id') }, loadCategories);
