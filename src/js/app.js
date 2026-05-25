@@ -31,6 +31,11 @@ function setCategoryIdInSession(categoryId) {
 // ======================
 // API Helper
 // ======================
+
+// Sends a JSON POST request to api.php
+// action: API action (e.g. 'getCategories')
+// data:   optional payload as an object
+// cb:     callback function receiving the server response
 function api(action, data = {}, cb) {
     $.ajax({
         url: 'api.php?action=' + action,
@@ -58,6 +63,7 @@ function renderCategoryTitle(id, title) {
 }
 
 function renderCategory(c) {
+    // Category names use the format "Group/Name" – only display the part after the slash
     let title = c.name.split("/");
     if(title.length > 1) title = title.slice(1).join("/");
     else title = '-';
@@ -158,14 +164,17 @@ function loadCategories() {
             return;
         }
 
+        // Last active category: restore from current state or from SessionStorage
         const desiredCategory = currentCategory ?? getCategoryIdFromSession();
 
         let title = "";
         let title_id = 1;
+        // Group categories into sections by their prefix ("Group/Name")
         res.forEach(c => {
             let x = c.name.split("/");
             c.view = c.view ?? 'list';
             if(x[0] != title) {
+                // New group detected – insert section heading
                 title = x[0];
                 title_id++;
                 $('#categoryList').append(renderCategoryTitle(title_id, title));
@@ -173,6 +182,7 @@ function loadCategories() {
             $('#c_' + title_id).append(renderCategory(c))
         });
 
+        // Select the desired category, falling back to the first available
         const selectedCategory = res.find(c => c.id === desiredCategory) ?? res[0];
         currentCategory = selectedCategory.id;
         currentView = selectedCategory.view;
@@ -193,6 +203,7 @@ function renderItemGroups(items, view = 'list') {
     $('#itemList').empty();
     setViewState(view);
 
+    // Collect items by group number (0 = default)
     const groups = {};
     items.forEach(i => {
         const g = i.group ?? 0;
@@ -200,6 +211,7 @@ function renderItemGroups(items, view = 'list') {
         groups[g].push(i);
     });
 
+    // Render groups in ascending order to preserve their sequence
     const sortedKeys = Object.keys(groups).map(Number).sort((a, b) => a - b);
     sortedKeys.forEach(gKey => {
         const ul = $(`<ul class="list-group item-group mb-3" data-group="${gKey}"></ul>`);
@@ -207,6 +219,7 @@ function renderItemGroups(items, view = 'list') {
         $('#itemList').append(ul);
     });
 
+    // Append drop target for a new group at the end (only when items exist)
     if (items.length > 0) {
         $('#itemList').append('<div class="item-group-new" data-group="new"><i class="bi bi-plus-circle"></i> New Group</div>');
     }
@@ -217,6 +230,22 @@ function renderItemGroups(items, view = 'list') {
 // ======================
 // Category Handling
 // ======================
+
+// Inline Create new Category
+$('#addCategory').on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if(editmodeCategory) return;
+    editmodeCategory = true;
+    const li = $('<li class="list-group-item list-group-item-dark editing"></li>');
+    li.html(createCategoryEditHtml());
+
+    if(currentCategory) $("#categoryList").find(`[data-id='${currentCategory}']`).closest('ul').append(li);
+    else $('#categoryList ul:last').append(li);
+    li.find('.category-name').focus();
+});
+
+// Category Click (Load Items)
 $(document).on('click', '#categoryList li', function(e) {
     const id = $(this).data('id');
     const view = $(this).data('view');
@@ -229,20 +258,6 @@ $(document).on('click', '#categoryList li', function(e) {
         $('.sidebar').removeClass('show');
         loadItems(id, view);
     }
-});
-
-// Inline Create
-$('#addCategory').on('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    if(editmodeCategory) return;
-    editmodeCategory = true;
-    const li = $('<li class="list-group-item list-group-item-dark editing"></li>');
-    li.html(createCategoryEditHtml());
-
-    if(currentCategory) $("#categoryList").find(`[data-id='${currentCategory}']`).closest('ul').append(li);
-    else $('#categoryList ul:last').append(li);
-    li.find('.category-name').focus();
 });
 
 // Edit Category
@@ -302,11 +317,13 @@ $(document).on('click', '.delete-category', function(e){
 // ======================
 // Items Handling
 // ======================
+
+// Inline Create new Item
 $('#addItem').on('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
     $('.sidebar').removeClass('show');
-    if(!currentCategory) return alert('Kategorie wählen');
+    if(!currentCategory) return alert('Active category required to add item!');
     const li = $('<li class="list-group-item editing"></li>');
     setViewState();
     li.html(createItemEditHtml());
@@ -319,6 +336,7 @@ $('#addItem').on('click', function(e) {
     li.find('.item-url').focus();
 });
 
+// Item Click (Open URL)
 $(document).on('click', '#itemList li', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -327,64 +345,6 @@ $(document).on('click', '#itemList li', function(e) {
         const url = $(this).find('.item-url a').attr('href');
         window.open(url, '_blank');
     }
-});
-
-// Save Item
-$(document).on('click', '.save-item', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const li = $(this).closest('li');
-    const id = li.data('id');
-
-    const url = li.find('.item-url').text().trim();
-    if(!isValidUrl(url)) {
-        alert('Please enter a valid URL (e.g. https://example.com).');
-        li.find('.item-url').focus();
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('action', li.data('id') ? 'updateItem' : 'addItem');
-    formData.append('id', li.data('id') || '');
-    formData.append('category_id', currentCategory);
-    formData.append('title', li.find('.item-title').text().trim());
-    formData.append('content', li.find('.item-content').text().trim());
-    formData.append('url', li.find('.item-url').text().trim());
-
-    const file1 = $('#itemImg').data('imageFile');
-    if(file1) {
-        formData.append('image', file1);
-    }
-    const file2 = $('#itemPrev').data('imageFile');
-    if(file2) {
-        formData.append('preview', file2);
-    }
-
-    if(id)
-    $.ajax({
-        url: 'api.php?action=updateItem',
-        method: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: () => loadItems(currentCategory, currentView)
-    });
-    else
-    $.ajax({
-        url: 'api.php?action=addItem',
-        method: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: () => loadItems(currentCategory, currentView)
-    });
-});
-
-// Cancel Item
-$(document).on('click', '.cancel-item', function(e){
-    e.preventDefault();
-    e.stopPropagation();
-    loadItems(currentCategory, currentView);
 });
 
 // Edit Item
@@ -405,6 +365,68 @@ $(document).on('click', '.item-act-edit', function(e){
     li.find('.item-title').focus();
 });
 
+// Save Item
+$(document).on('click', '.save-item', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const li = $(this).closest('li');
+    const id = li.data('id');
+
+    const url = li.find('.item-url').text().trim();
+    if(!isValidUrl(url)) {
+        alert('Please enter a valid URL (e.g. https://example.com).');
+        li.find('.item-url').focus();
+        return;
+    }
+
+    // FormData is used because image files (image, preview) may be uploaded
+    const formData = new FormData();
+    formData.append('action', li.data('id') ? 'updateItem' : 'addItem');
+    formData.append('id', li.data('id') || '');
+    formData.append('category_id', currentCategory);
+    formData.append('title', li.find('.item-title').text().trim());
+    formData.append('content', li.find('.item-content').text().trim());
+    formData.append('url', li.find('.item-url').text().trim());
+
+    // Only append image files if they were set via drag-and-drop
+    const file1 = $('#itemImg').data('imageFile');
+    if(file1) {
+        formData.append('image', file1);
+    }
+    const file2 = $('#itemPrev').data('imageFile');
+    if(file2) {
+        formData.append('preview', file2);
+    }
+
+    if(id) {
+        // Update existing item
+        $.ajax({
+            url: 'api.php?action=updateItem',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: () => loadItems(currentCategory, currentView)
+        });
+    } else {
+        // Create new item
+        $.ajax({
+            url: 'api.php?action=addItem',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: () => loadItems(currentCategory, currentView)
+        });
+    }
+});
+
+// Cancel Item Edit
+$(document).on('click', '.cancel-item', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    loadItems(currentCategory, currentView);
+});
 
 // Delete Item
 $(document).on('click', '.item-act-delete', function(e){
@@ -415,6 +437,12 @@ $(document).on('click', '.item-act-delete', function(e){
     if(!confirm('Eintrag löschen?')) return;
     api('deleteItem', { id: li.data('id') }, () => loadItems(currentCategory, currentView));
 });
+
+
+
+// ======================
+// Items Handling - Icon
+// ======================
 
 // Fetch Icons
 $(document).on('click', '.item-act-icon', function(e) {
@@ -443,13 +471,20 @@ $(document).on('click', '.icon-img', function(e) {
     });
 });
 
-// Fetch Preview
+
+
+// ======================
+// Items Handling - Screenshots
+// ======================
+
+// Fetch screenshot from server and display preview in modal
 $(document).on('click', '.item-act-screenshot', function(e) {
     e.preventDefault();
     e.stopPropagation();
     $('.sidebar').removeClass('show');
     const li = $(this).closest('li');
     const id = li.data('id');
+    // Reset modal and open immediately – content is loaded asynchronously
     $('#screenshotModalPreview').attr('src', '');
     $('#screenshotModal .modal-title').html('Loading ...');
     $('#deleteScreenshot').hide();
@@ -457,6 +492,7 @@ $(document).on('click', '.item-act-screenshot', function(e) {
     $('#screenshotModal').modal('show');
     api('getScreenshot', { id: id }, res => {
         if(res.image) {
+            // Display image as Base64 DataURL; store file reference for later upload
             $('#screenshotModalPreview').data('id', id);
             $('#screenshotModalPreview').data('imageFile', res.image);
             $('#screenshotModalPreview').attr('src', 'data:image/png;base64,' + res.image);
@@ -719,7 +755,7 @@ function uploadBookmark(file) {
 
 
 // ======================
-// View Toggle
+// View-Style Toggle
 // ======================
 function setViewState(view = 'list') {
     // Set Toggle-Button
@@ -746,7 +782,7 @@ $('.view-toggle').on('click', function(e) {
 
 
 // ======================
-// Mobile-View Sidebar Button
+// Mobile Sidebar Toggle
 // ======================
 $('#sidebar-btn').on('click', function(e) {
     e.preventDefault();
