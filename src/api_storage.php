@@ -354,7 +354,7 @@ class Storage
         exit;
     }
 
-    public function importBookmarks(string $file)
+    public function importBookmarks(string $file, bool $deleteExisting = false)
     {
         $html = file_get_contents($file);
         $html = str_replace('</A>', '</A></DT>', $html);
@@ -368,6 +368,16 @@ class Storage
 
         $dl = $dom->getElementsByTagName('dl')->item(0);
         $data = $this->load();
+
+        if ($deleteExisting) {
+            foreach ($data['items'] as $i) {
+                foreach (glob(__DIR__ . '/uploads/thumb/item_'   . $i['id'] . '.*') as $f) unlink($f);
+                foreach (glob(__DIR__ . '/uploads/preview/item_' . $i['id'] . '.*') as $f) unlink($f);
+            }
+            $data['categories'] = [];
+            $data['items']      = [];
+        }
+
         $this->countLevel = 0;
         $this->importBookmarkNode($dl, '', $data);
         $this->save($data);

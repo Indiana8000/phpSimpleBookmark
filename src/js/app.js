@@ -303,7 +303,7 @@ $(document).on('click', '.delete-category', function(e){
     e.stopPropagation();
     if(isCategoryEditMode) return;
     const li = $(this).closest('li');
-    if(!confirm(`Kategorie ${li.find('.category-name').text()} löschen?`)) return;
+    if(!confirm(`Delete category "${li.find('.category-name').text()}"?`)) return;
     if(currentCategory == li.data('id')) {
         currentCategory = null;
         setCategoryIdInSession(null);
@@ -434,7 +434,7 @@ $(document).on('click', '.item-act-delete', function(e){
     e.stopPropagation();
     $('.sidebar').removeClass('show');
     const li = $(this).closest('li');
-    if(!confirm('Eintrag löschen?')) return;
+    if(!confirm('Delete this bookmark?')) return;
     api('deleteItem', { id: li.data('id') }, () => loadItems(currentCategory, currentView));
 });
 
@@ -730,28 +730,41 @@ $('#bookmarkDrop').on('drop', function(e) {
     uploadBookmark(e.originalEvent.dataTransfer.files[0])
 });
 
+let pendingImportFile = null;
+
 function uploadBookmark(file) {
     if(!file) return;
 
     if(!file.name.endsWith('.html')) {
-        alert('Only bookmark html allowed');
+        alert('Only bookmark HTML files are allowed.');
         return;
     }
 
-    let formData = new FormData();
-    formData.append('file',file);
+    pendingImportFile = file;
+    $('#importModal').modal('show');
+}
+
+function executeImport(deleteExisting) {
+    $('#importModal').modal('hide');
+    if(!pendingImportFile) return;
+
+    const formData = new FormData();
+    formData.append('file', pendingImportFile);
+    formData.append('deleteExisting', deleteExisting ? '1' : '0');
+    pendingImportFile = null;
 
     $.ajax({
-        url:'api.php?action=importBookmarks',
-        method:'POST',
-        data:formData,
-        contentType:false,
-        processData:false,
-        success:()=>{
-            location.reload();
-        }
+        url: 'api.php?action=importBookmarks',
+        method: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: () => { location.reload(); }
     });
 }
+
+$('#importKeepBtn').on('click', () => executeImport(false));
+$('#importDeleteBtn').on('click', () => executeImport(true));
 
 
 // ======================

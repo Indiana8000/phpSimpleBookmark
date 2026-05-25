@@ -220,7 +220,8 @@ switch($action){
         $storage->exportBookmarks();
         break;
     case 'importBookmarks':
-        $storage->importBookmarks($_FILES['file']['tmp_name']);
+        $deleteExisting = ($_POST['deleteExisting'] ?? '0') === '1';
+        $storage->importBookmarks($_FILES['file']['tmp_name'], $deleteExisting);
         echo json_encode(['ok'=>true]);
         break;
 
