@@ -601,12 +601,13 @@ $(document).on('dragstart', '.content-dragndrop-item', function(e) {
     draggedItemId = $(this).data('id');
     e.originalEvent.dataTransfer.effectAllowed = 'move';
     console.log("dragstart - " + draggedItemId);
+    $('.item-group-new').addClass('is-visible');
 });
 
 $(document).on('dragend', '.content-dragndrop-item', function(e) {
     draggedItemId = null;
     $('ul.item-group').removeClass('group-dragover');
-    $('.item-group-new').removeClass('group-dragover');
+    $('.item-group-new').removeClass('group-dragover').removeClass('is-visible');
 });
 
 $(document).on('dragover', '.category-dragndrop-item', function(e) {
